@@ -1,0 +1,554 @@
+/* VENOM · Advanced Visual Effects */
+
+/* ══════════════════════════════════════════════════════════════
+   CURSOR GLOW EFFECT
+   ═══════════════════════════════════════════════════════════════ */
+.v-cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--v-p) 30%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.v-cursor-glow.is-active {
+  opacity: 1;
+}
+
+@media (max-width: 1024px) {
+  .v-cursor-glow { display: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PARTICLE SYSTEM
+   ══════════════════════════════════════════════════════════════ */
+.v-particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.v-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--v-p);
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: vParticleFloat 15s infinite linear;
+}
+
+.v-particle:nth-child(2n) {
+  background: var(--v-a);
+  animation-duration: 20s;
+  animation-delay: -5s;
+}
+
+.v-particle:nth-child(3n) {
+  width: 6px;
+  height: 6px;
+  opacity: 0.2;
+  animation-duration: 25s;
+  animation-delay: -10s;
+}
+
+@keyframes vParticleFloat {
+  0% {
+    transform: translateY(100vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(100px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3D HERO STACK ENHANCED
+   ═══════════════════════════════════════════════════════════════ */
+.v-stack-3d {
+  perspective: 2000px;
+  transform-style: preserve-3d;
+}
+
+.v-stack-item-3d {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-style: preserve-3d;
+}
+
+.v-stack-item-3d::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(0,0,0,0.2) 100%);
+  pointer-events: none;
+}
+
+.v-stack-item-3d:nth-child(1) {
+  transform: translateZ(80px) rotateY(-8deg) rotateX(5deg);
+  z-index: 3;
+}
+
+.v-stack-item-3d:nth-child(2) {
+  transform: translate(40px, 25px) translateZ(40px) rotateY(6deg) rotateX(-3deg);
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.v-stack-item-3d:nth-child(3) {
+  transform: translate(-35px, 45px) translateZ(0) rotateY(-10deg) rotateX(8deg);
+  z-index: 1;
+  opacity: 0.7;
+}
+
+.v-stack-3d:hover .v-stack-item-3d:nth-child(1) {
+  transform: translateZ(100px) rotateY(-5deg) rotateX(3deg) scale(1.02);
+}
+
+.v-stack-3d:hover .v-stack-item-3d:nth-child(2) {
+  transform: translate(60px, 15px) translateZ(50px) rotateY(8deg) rotateX(-2deg);
+}
+
+.v-stack-3d:hover .v-stack-item-3d:nth-child(3) {
+  transform: translate(-50px, 35px) translateZ(10px) rotateY(-12deg) rotateX(10deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRAYER TIME WIDGET
+   ═══════════════════════════════════════════════════════════════ */
+.v-prayer-widget {
+  background: var(--v-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--v-gline);
+  border-radius: var(--v-r);
+  padding: 18px 22px;
+  box-shadow: var(--v-sh);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 20px auto;
+  max-width: 900px;
+}
+
+.v-prayer-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--v-tx);
+}
+
+.v-prayer-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--v-p), var(--v-a));
+  border-radius: 10px;
+  color: #fff;
+}
+
+.v-prayer-times {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.v-prayer-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  background: var(--v-surf2);
+  border-radius: 12px;
+  border: 1px solid var(--v-line);
+  min-width: 70px;
+  transition: all 0.3s ease;
+}
+
+.v-prayer-item.is-next {
+  background: linear-gradient(135deg, var(--v-p), var(--v-a));
+  color: #fff;
+  border-color: transparent;
+  transform: scale(1.08);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--v-p) 40%, transparent);
+}
+
+.v-prayer-item.is-next .v-prayer-name {
+  color: rgba(255,255,255,0.9);
+}
+
+.v-prayer-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--v-mut);
+  margin-bottom: 4px;
+}
+
+.v-prayer-time {
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.v-prayer-countdown {
+  font-size: 0.75rem;
+  color: var(--v-mut);
+  text-align: center;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE VISITOR TICKER
+   ═══════════════════════════════════════════════════════════════ */
+.v-live-ticker {
+  background: var(--v-glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--v-gline);
+  border-radius: var(--v-r);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  margin: 20px auto;
+  max-width: 900px;
+}
+
+.v-ticker-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--v-tx);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.v-ticker-dot {
+  width: 10px;
+  height: 10px;
+  background: #10b981;
+  border-radius: 50%;
+  animation: vPulse 2s infinite;
+  box-shadow: 0 0 0 0 color-mix(in srgb, #10b981 60%, transparent);
+}
+
+.v-ticker-track {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.v-ticker-content {
+  display: flex;
+  gap: 30px;
+  animation: vTickerScroll 30s linear infinite;
+  width: max-content;
+}
+
+.v-ticker-content:hover {
+  animation-play-state: paused;
+}
+
+.v-ticker-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--v-mut);
+  white-space: nowrap;
+}
+
+.v-ticker-stat svg {
+  color: var(--v-p);
+  flex-shrink: 0;
+}
+
+.v-ticker-value {
+  color: var(--v-tx);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes vTickerScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOATING CHAT WIDGET
+   ═══════════════════════════════════════════════════════════════ */
+.v-chat-widget {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.v-chat-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--v-sh2);
+  color: #fff;
+  text-decoration: none;
+}
+
+.v-chat-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+}
+
+.v-chat-btn-whatsapp {
+  background: linear-gradient(135deg, #25d366, #128c7e);
+}
+
+.v-chat-btn-telegram {
+  background: linear-gradient(135deg, #0088cc, #0099ff);
+}
+
+.v-chat-btn-label {
+  opacity: 0;
+  max-width: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.v-chat-widget:hover .v-chat-btn-label {
+  opacity: 1;
+  max-width: 150px;
+  margin-right: 5px;
+}
+
+.v-chat-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 999px;
+  animation: vBounce 1s infinite;
+}
+
+@keyframes vBounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE BOTTOM NAVIGATION
+   ═══════════════════════════════════════════════════════════════ */
+.v-mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--v-glass);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--v-gline);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.1);
+}
+
+.v-mobile-nav-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 12px;
+}
+
+.v-mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  color: var(--v-mut);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  flex: 1;
+  justify-content: center;
+}
+
+.v-mobile-nav-item.is-active,
+.v-mobile-nav-item:hover {
+  color: var(--v-p);
+  background: color-mix(in srgb, var(--v-p) 10%, transparent);
+}
+
+.v-mobile-nav-item svg {
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 768px) {
+  .v-mobile-nav {
+    display: block;
+  }
+  
+  .v-fab {
+    bottom: 90px !important;
+  }
+  
+  .v-chat-widget {
+    bottom: 110px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENHANCED ANIMATIONS
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes vShimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+.v-shimmer {
+  background: linear-gradient(90deg, 
+    color-mix(in srgb, var(--v-p) 10%, transparent) 0%,
+    color-mix(in srgb, var(--v-p) 20%, transparent) 50%,
+    color-mix(in srgb, var(--v-p) 10%, transparent) 100%
+  );
+  background-size: 1000px 100%;
+  animation: vShimmer 3s infinite linear;
+}
+
+@keyframes vGlow {
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--v-p) 40%, transparent); }
+  50% { box-shadow: 0 0 40px color-mix(in srgb, var(--v-p) 70%, transparent); }
+}
+
+.v-glow {
+  animation: vGlow 3s ease-in-out infinite;
+}
+
+/* Smooth page transitions */
+.v-page-transition {
+  animation: vPageFade 0.5s ease-out;
+}
+
+@keyframes vPageFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading skeleton */
+.v-skeleton {
+  background: linear-gradient(90deg, 
+    var(--v-bg2) 25%, 
+    color-mix(in srgb, var(--v-p) 10%, var(--v-bg2)) 50%, 
+    var(--v-bg2) 75%
+  );
+  background-size: 200% 100%;
+  animation: vShimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .v-prayer-widget,
+  .v-live-ticker {
+    padding: 14px 16px;
+  }
+  
+  .v-prayer-times {
+    gap: 8px;
+  }
+  
+  .v-prayer-item {
+    padding: 6px 10px;
+    min-width: 60px;
+  }
+  
+  .v-prayer-time {
+    font-size: 0.85rem;
+  }
+  
+  .v-chat-widget {
+    bottom: 100px;
+    right: 14px;
+  }
+  
+  .v-chat-btn-label {
+    display: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .v-particle,
+  .v-ticker-content,
+  .v-prayer-item.is-next,
+  .v-chat-badge {
+    animation: none;
+  }
+  
+  .v-stack-item-3d {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .v-particles,
+  .v-cursor-glow,
+  .v-mobile-nav,
+  .v-chat-widget,
+  .v-live-ticker,
+  .v-prayer-widget {
+    display: none !important;
+  }
+}
