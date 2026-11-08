@@ -1,0 +1,76 @@
+/* ═══════════════════════════════════════════════════════════════
+   VENOM · Member Dashboard Premium
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-mb-wrap{max-width:var(--v-max);margin:0 auto;padding:32px 20px 60px}
+.v-mb-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.v-mb-head h1{margin:0;font-size:clamp(1.5rem,3vw,2rem);font-weight:800;color:var(--v-tx)}
+.v-mb-head p{margin:4px 0 0;color:var(--v-mut);font-size:.92rem}
+.v-mb-layout{display:grid;grid-template-columns:minmax(280px,340px) 1fr;gap:28px;align-items:start}
+
+/* Profile Card */
+.v-mb-profile{background:var(--v-glass);border:1px solid var(--v-gline);border-radius:var(--v-r);padding:24px;
+  backdrop-filter:blur(14px);box-shadow:var(--v-sh);position:sticky;top:90px}
+.v-mb-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--v-p),var(--v-a));
+  display:grid;place-items:center;color:#fff;font-size:2rem;font-weight:800;margin:0 auto 16px;
+  box-shadow:0 10px 24px color-mix(in srgb,var(--v-p) 40%,transparent)}
+.v-mb-name{text-align:center;font-size:1.1rem;font-weight:800;margin:0 0 4px;color:var(--v-tx)}
+.v-mb-id{text-align:center;font-size:.82rem;color:var(--v-mut);margin-bottom:18px}
+.v-mb-list{display:grid;gap:10px;padding-top:16px;border-top:1px solid var(--v-line)}
+.v-mb-row{display:flex;align-items:flex-start;gap:10px;font-size:.88rem}
+.v-mb-row svg{color:var(--v-p);flex-shrink:0;margin-top:2px}
+.v-mb-row b{color:var(--v-mut);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:2px}
+.v-mb-row span{color:var(--v-tx);font-weight:600;word-break:break-word}
+
+/* Digital Card */
+.v-mb-digicard{margin-top:18px;padding:20px;border-radius:16px;background:linear-gradient(135deg,var(--v-p),var(--v-a));
+  color:#fff;text-align:center;box-shadow:0 15px 30px color-mix(in srgb,var(--v-p) 35%,transparent);position:relative;overflow:hidden}
+.v-mb-digicard::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(255,255,255,.18),transparent 50%);pointer-events:none}
+.v-mb-digicard-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;opacity:.85;margin-bottom:8px;position:relative}
+.v-mb-digicard-title{font-size:1.05rem;font-weight:800;margin:0 0 12px;position:relative}
+.v-mb-digicard-qr{display:inline-block;background:#fff;padding:10px;border-radius:10px;position:relative}
+.v-mb-digicard-qr svg{display:block}
+
+/* Content Grid */
+.v-mb-grid{display:grid;gap:22px}
+.v-mb-card{background:var(--v-glass);border:1px solid var(--v-gline);border-radius:var(--v-r);padding:22px;
+  backdrop-filter:blur(14px);box-shadow:var(--v-sh)}
+.v-mb-card-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.v-mb-card-head svg{color:var(--v-p)}
+.v-mb-card-head h3{margin:0;font-size:1.05rem;font-weight:800;color:var(--v-tx)}
+
+/* Stat Pills */
+.v-mb-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:22px}
+.v-mb-stat{padding:16px;border-radius:14px;background:var(--v-glass);border:1px solid var(--v-gline);backdrop-filter:blur(10px);
+  display:flex;align-items:center;gap:12px;transition:.25s}
+.v-mb-stat:hover{transform:translateY(-3px);box-shadow:var(--v-sh)}
+.v-mb-stat-icon{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:color-mix(in srgb,var(--v-p) 12%,transparent);color:var(--v-p);flex-shrink:0}
+.v-mb-stat-num{font-size:1.4rem;font-weight:800;line-height:1;color:var(--v-tx)}
+.v-mb-stat-lbl{font-size:.72rem;color:var(--v-mut);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+
+/* Loans Table */
+.v-mb-loans{width:100%;border-collapse:separate;border-spacing:0}
+.v-mb-loans th{padding:12px 14px;text-align:left;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--v-mut);border-bottom:2px solid var(--v-line);background:var(--v-bg2)}
+.v-mb-loans td{padding:14px;font-size:.88rem;border-bottom:1px solid var(--v-line);color:var(--v-tx);vertical-align:middle}
+.v-mb-loans tr:last-child td{border-bottom:none}
+.v-mb-loans tr:hover td{background:color-mix(in srgb,var(--v-p) 5%,transparent)}
+.v-mb-loan-title{font-weight:700;margin:0 0 2px;color:var(--v-tx)}
+.v-mb-loan-meta{font-size:.78rem;color:var(--v-mut)}
+.v-mb-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;font-size:.72rem;font-weight:700}
+.v-mb-chip-ok{background:color-mix(in srgb,var(--v-ok) 15%,transparent);color:var(--v-ok)}
+.v-mb-chip-warn{background:color-mix(in srgb,var(--v-warn) 15%,transparent);color:var(--v-warn)}
+.v-mb-chip-err{background:color-mix(in srgb,var(--v-err) 12%,transparent);color:var(--v-err)}
+
+/* Login Gate */
+.v-mb-gate{max-width:440px;margin:60px auto;padding:40px;background:var(--v-glass);border:1px solid var(--v-gline);
+  border-radius:var(--v-r);backdrop-filter:blur(18px);box-shadow:var(--v-sh2);text-align:center}
+.v-mb-gate-icon{width:72px;height:72px;margin:0 auto 18px;background:linear-gradient(135deg,var(--v-p),var(--v-a));
+  border-radius:18px;display:grid;place-items:center;color:#fff;box-shadow:0 12px 28px color-mix(in srgb,var(--v-p) 40%,transparent)}
+.v-mb-gate h2{margin:0 0 8px;font-size:1.4rem;font-weight:800}
+.v-mb-gate p{color:var(--v-mut);margin:0 0 22px}
+
+@media(max-width:900px){
+  .v-mb-layout{grid-template-columns:1fr}
+  .v-mb-profile{position:static}
+}

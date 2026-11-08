@@ -4,18 +4,25 @@
  * Semua query dibungkus aman: gagal = array kosong, bukan fatal error.
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
-
+/* ── Language switcher: VENOM yang mengelola cookie (kompatibel SLiMS) ── */
+if (isset($_GET['select_lang']) && is_string($_GET['select_lang'])
+    && preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $_GET['select_lang'])) {
+    $vsl = $_GET['select_lang'];
+    $_COOKIE['select_lang'] = $vsl;
+    if (isset($GLOBALS['sysconf']) && is_array($GLOBALS['sysconf'])) {
+        $GLOBALS['sysconf']['default_lang'] = $vsl;
+    }
+    if (!headers_sent()) {
+        setcookie('select_lang', $vsl, time() + 86400 * 30, '/');
+        $vq = $_GET; unset($vq['select_lang']);
+        header('Location: index.php' . ($vq ? '?' . http_build_query($vq) : ''));
+        exit;
+    }
+}
 // ═══════════════════════════════════════════════════════════════
 // FIX CRITICAL: Definisikan GLOBAL variables untuk SLiMS 9.8.0
 // HARUS ADA DI SINI agar terbaca oleh visitor.inc.php
 // ═══════════════════════════════════════════════════════════════
-if (!isset($GLOBALS['main_template_path'])) {
-    $GLOBALS['main_template_path'] = dirname(__DIR__);
-}
-if (!isset($main_template_path)) {
-    $main_template_path = $GLOBALS['main_template_path'];
-}
-
 if (defined('VENOM_LOADED')) return;
 define('VENOM_LOADED', true);
 define('VENOM_VER', '1.0.0');
@@ -84,7 +91,9 @@ function venom_title()
 
 function venom_lang_code()
 {
-    $l = Venom_Core::conf('default_lang', 'id_ID');
+    $l = isset($_GET['select_lang']) ? $_GET['select_lang']
+       : (isset($_COOKIE['select_lang']) ? $_COOKIE['select_lang']
+       : Venom_Core::conf('default_lang', 'id_ID'));
     return substr(preg_replace('/[^a-zA-Z_]/', '', (string) $l), 0, 2) ?: 'id';
 }
 

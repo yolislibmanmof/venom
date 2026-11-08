@@ -4,78 +4,50 @@ $vstats  = venom_stats();
 ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 1. HERO SECTION -->
+<!-- 1. HERO SECTION (PREMIUM PHOTO SLIDER atau CLASSIC FALLBACK)  -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<?php if (venom_on('hero') && $vslides): ?>
-<section class="v-hero" id="vHero" data-interval="<?= (int) venom_cfg('hero.interval', 6000) ?>">
-  <div class="v-wrap v-hero-inner">
-
-    <div class="v-hero-copy">
-      <div class="v-slides">
-        <?php foreach ($vslides as $i => $s): ?>
-        <div class="v-slide<?= $i === 0 ? ' is-active' : '' ?>" data-slide="<?= (int) $i ?>">
-          <?php if (!empty($s['kicker'])): ?>
-            <span class="v-kicker"><?= venom_icon('sparkles', 15) ?><?= venom_e($s['kicker']) ?></span>
-          <?php endif; ?>
-          <h1 class="v-hero-title"><?= venom_e(isset($s['title']) ? $s['title'] : '') ?></h1>
-          <p class="v-hero-text"><?= venom_e(isset($s['text']) ? $s['text'] : '') ?></p>
-          <?php if (!empty($s['cta'])): ?>
-            <a class="v-btn v-btn-primary v-btn-lg" href="<?= venom_u($s['url']) ?>">
-              <?= venom_e($s['cta']) ?><?= venom_icon('right', 18) ?>
+<?php if (venom_on('hero')): ?>
+<section class="v-hero v-wrap" id="vHero">
+  <?php if (!empty($vslides) && venom_cfg('hero.use_slider', true)): ?>
+    <!-- PREMIUM PHOTO SLIDER -->
+    <?php venom_part('_hero-slider'); ?>
+  <?php else: ?>
+    <!-- CLASSIC HERO FALLBACK (jika tidak ada slide) -->
+    <div class="v-hero-inner">
+      <div class="v-hero-copy">
+        <span class="v-kicker"><?= venom_icon('sparkles', 15) ?><?= venom_e(venom_cfg('hero.kicker', 'Perpustakaan Digital')) ?></span>
+        <h1 class="v-hero-title"><?= venom_e(venom_cfg('hero.title', 'Jelajahi Dunia Tanpa Batas')) ?></h1>
+        <p class="v-hero-text"><?= venom_e(venom_cfg('hero.text', 'Temukan ribuan koleksi buku, jurnal, dan media digital dalam satu platform.')) ?></p>
+      </div>
+      <div class="v-hero-art">
+        <div class="v-stack" data-tilt>
+          <?php foreach (array_slice(venom_featured(3), 0, 3) as $i => $b): ?>
+            <a class="v-stack-item v-stack-<?= (int) $i ?>" href="<?= venom_u(venom_detail_url($b['biblio_id'])) ?>">
+              <img src="<?= venom_e(venom_cover($b['image'], $b['title'])) ?>" alt="<?= venom_e($b['title']) ?>"
+                   loading="lazy" decoding="async" width="300" height="420">
             </a>
-          <?php endif; ?>
-        </div>
-        <?php endforeach; ?>
-      </div>
-
-      <form class="v-search" action="index.php" method="get" role="search">
-        <span class="v-search-icon"><?= venom_icon('search', 20) ?></span>
-        <input type="search" name="keywords" maxlength="120" autocomplete="off"
-               placeholder="<?= venom_e(venom_t('search')) ?>" aria-label="Kata kunci">
-        <button type="submit" name="search" value="Search" class="v-btn v-btn-primary">
-          <?= venom_e(venom_t('search_btn', 'Cari')) ?>
-        </button>
-      </form>
-
-      <div class="v-quick">
-        <span>Populer:</span>
-        <?php foreach (array_slice(venom_topics(6), 0, 6) as $t): ?>
-          <a class="v-chip" href="<?= venom_u(venom_search_url($t['topic'])) ?>"><?= venom_e($t['topic']) ?></a>
-        <?php endforeach; ?>
-      </div>
-
-      <?php if (count($vslides) > 1): ?>
-      <div class="v-hero-ctrl">
-        <button type="button" class="v-icon-btn" data-hero="prev" aria-label="Slide sebelumnya"><?= venom_icon('left', 18) ?></button>
-        <div class="v-dots">
-          <?php foreach ($vslides as $i => $s): ?>
-            <button type="button" class="v-dot<?= $i === 0 ? ' is-active' : '' ?>" data-hero-dot="<?= (int) $i ?>"
-                    aria-label="Slide <?= $i + 1 ?>"></button>
           <?php endforeach; ?>
+          <span class="v-stack-glow"></span>
         </div>
-        <button type="button" class="v-icon-btn" data-hero="next" aria-label="Slide berikutnya"><?= venom_icon('right', 18) ?></button>
-      </div>
-      <?php endif; ?>
-    </div>
-
-    <div class="v-hero-art">
-      <div class="v-stack" data-tilt>
-        <?php foreach (array_slice(venom_featured(3), 0, 3) as $i => $b): ?>
-          <a class="v-stack-item v-stack-<?= (int) $i ?>" href="<?= venom_u(venom_detail_url($b['biblio_id'])) ?>">
-            <img src="<?= venom_e(venom_cover($b['image'], $b['title'])) ?>" alt="<?= venom_e($b['title']) ?>"
-                 loading="lazy" decoding="async" width="300" height="420">
-          </a>
-        <?php endforeach; ?>
-        <span class="v-stack-glow"></span>
       </div>
     </div>
+  <?php endif; ?>
 
+  <!-- SEARCH BOX (Premium) -->
+  <?php venom_part('_search-form'); ?>
+
+  <!-- QUICK TOPICS -->
+  <div class="v-quick" style="margin-top: 16px;">
+    <span>Populer:</span>
+    <?php foreach (array_slice(venom_topics(6), 0, 6) as $t): ?>
+      <a class="v-chip" href="<?= venom_u(venom_search_url($t['topic'])) ?>"><?= venom_e($t['topic']) ?></a>
+    <?php endforeach; ?>
   </div>
 </section>
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 2. TICKER LAMA (Tetap dipertahankan sesuai kode asli Anda) -->
+<!-- 2. TICKER STATS MARQUEE                                        -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('ticker')): ?>
 <div class="v-ticker" aria-hidden="true">
@@ -95,22 +67,22 @@ $vstats  = venom_stats();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 3. TAHAP 2: WIDGET JADWAL SHOLAT & LIVE VISITOR TICKER (BARU) -->
+<!-- 3. WIDGET: JADWAL SHOLAT & LIVE VISITOR TICKER (TAHAP 2)       -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_cfg('features.prayer_times', true)): ?>
-    <?php venom_part('waktu_sholat'); ?>
+  <?php venom_part('waktu_sholat'); ?>
 <?php endif; ?>
 
 <?php if (venom_cfg('features.live_ticker', true)): ?>
-    <?php venom_part('visitor/visitor_ticker'); ?>
+  <?php venom_part('visitor/visitor_ticker'); ?>
 <?php endif; ?>
-<!-- ═══════════════════════════════════════════════════════════════ -->
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 4. STATISTIK SECTION -->
+<!-- 4. STATISTIK SECTION                                           -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('stats')): ?>
 <section class="v-wrap v-sec">
+  <?= venom_section_head('bar-chart', venom_t('stats', 'Statistik Perpustakaan'), 'Data real-time perpustakaan kami') ?>
   <div class="v-grid v-grid-stats">
     <?= venom_stat_card('book',  $vstats['titles'],  venom_t('titles', 'Judul Koleksi'), 'p') ?>
     <?= venom_stat_card('layers',$vstats['items'],   venom_t('items', 'Eksemplar'), 'a') ?>
@@ -122,18 +94,18 @@ $vstats  = venom_stats();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 5. KOLEKSI TERBARU (NEW ARRIVALS) -->
+<!-- 5. KOLEKSI TERBARU (NEW ARRIVALS)                              -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('new_arrivals')): ?>
 <section class="v-wrap v-sec" id="v-koleksi">
   <?= venom_section_head('fire', venom_t('new', 'Koleksi Terbaru'),
-        'Tambahan koleksi paling baru di perpustakaan kami', 'index.php?p=news', 'Info koleksi') ?>
+        'Tambahan koleksi paling baru di perpustakaan kami', 'index.php?keywords=&search=Search', 'Lihat Semua') ?>
   <?= venom_book_grid(venom_new_arrivals(venom_cfg('limits.new', 10)), 'BARU') ?>
 </section>
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 6. KOLEKSI UNGGULAN (FEATURED) -->
+<!-- 6. KOLEKSI UNGGULAN (FEATURED)                                 -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('featured')): ?>
 <section class="v-wrap v-sec" id="v-unggulan">
@@ -143,7 +115,7 @@ $vstats  = venom_stats();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 7. JELAJAH TOPIK (TOPICS) -->
+<!-- 7. JELAJAH TOPIK (TOPICS)                                      -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('topics')): $vtopics = venom_topics(venom_cfg('limits.topics', 14)); ?>
 <section class="v-wrap v-sec">
@@ -161,11 +133,11 @@ $vstats  = venom_stats();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
-<!-- 8. BERITA & PENGUMUMAN (NEWS) -->
+<!-- 8. BERITA & PENGUMUMAN (NEWS)                                  -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('news')): $vnews = venom_news(venom_cfg('limits.news', 3)); if ($vnews): ?>
 <section class="v-wrap v-sec">
-  <?= venom_section_head('news', venom_t('news', 'Berita & Pengumuman'), '', 'index.php?p=news') ?>
+  <?= venom_section_head('news', venom_t('news', 'Berita & Pengumuman'), '', 'index.php?p=news', 'Semua Berita') ?>
   <div class="v-grid v-grid-news">
     <?php foreach ($vnews as $n):
       $exc = Venom_Sec::text(isset($n['content_desc']) ? $n['content_desc'] : '', 160); ?>
@@ -179,3 +151,22 @@ $vstats  = venom_stats();
   </div>
 </section>
 <?php endif; endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 9. CTA: AJAK MENJADI ANGGOTA                                   -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if (venom_cfg('features.member_cta', true)): ?>
+<section class="v-wrap v-sec">
+  <div class="vnx-cta-banner">
+    <div class="vnx-cta-bg"></div>
+    <div class="vnx-cta-content">
+      <h2>Belum Jadi Anggota?</h2>
+      <p>Daftar gratis sekarang dan nikmati akses penuh ke koleksi perpustakaan kami secara digital.</p>
+      <a href="index.php?p=member" class="vnx-slide-btn">
+        Daftar Sekarang
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+<?php endif; ?>

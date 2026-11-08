@@ -5,11 +5,12 @@
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 
 return [
-    'brand' => [
-        'name'    => 'VENOM',
-        'tagline' => 'Ultimate Library Experience',
-        'logo'    => '', 
-    ],
+'brand' => [
+    'name'    => 'VENOM',
+    'tagline' => 'Ultimate Library Experience',
+    'logo'    => '',   
+    'favicon' => '',   
+],
 
     'ui' => [
         'palette'   => 'venom',

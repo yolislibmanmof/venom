@@ -64,3 +64,48 @@ function venom_book_grid(array $rows, $badge = '')
     foreach ($rows as $r) $h .= venom_card_biblio($r, $badge);
     return $h . '</div>';
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   LOGO & FAVICON — prioritas: Admin/System → config tema → file tema
+   ═══════════════════════════════════════════════════════════════ */
+if (!function_exists('venom_logo_url')) {
+    function venom_logo_url()
+    {
+        $sb = defined('SB') ? SB : '';
+        /* 1) Setting Admin → Modul System (logo_image) */
+        $li = (string) Venom_Core::conf('logo_image', '');
+        if ($li !== '' && @is_file($sb . 'images/default/' . $li)) {
+            return venom_base_url() . 'images/default/' . rawurlencode($li);
+        }
+        /* 2) Config tema: brand.logo */
+        $tl = (string) venom_cfg('brand.logo', '');
+        if ($tl !== '') {
+            if (preg_match('~^(https?:)?//~i', $tl) || strpos($tl, '/') === 0) return $tl;
+            if (@is_file($sb . $tl)) return venom_base_url() . $tl;
+        }
+        /* 3) File bawaan tema */
+        if (@is_file(VENOM_DIR . 'assets/images/logo.png')) return VENOM_URL . 'assets/images/logo.png';
+        return '';
+    }
+}
+
+if (!function_exists('venom_favicon_url')) {
+    function venom_favicon_url()
+    {
+        $sb = defined('SB') ? SB : '';
+        /* 1) Setting Admin → Modul System (webicon) */
+        $wi = (string) Venom_Core::conf('webicon', '');
+        if ($wi !== '' && @is_file($sb . 'images/default/' . $wi)) {
+            return venom_base_url() . 'images/default/' . rawurlencode($wi);
+        }
+        /* 2) Config tema: brand.favicon */
+        $tf = (string) venom_cfg('brand.favicon', '');
+        if ($tf !== '' && @is_file($sb . $tf)) return venom_base_url() . $tf;
+        /* 3) Favicon standar SLiMS / root */
+        if (@is_file($sb . 'webicon.ico')) return venom_base_url() . 'webicon.ico';
+        if (@is_file($sb . 'favicon.ico')) return venom_base_url() . 'favicon.ico';
+        /* 4) File bawaan tema */
+        if (@is_file(VENOM_DIR . 'assets/images/favicon.png')) return VENOM_URL . 'assets/images/favicon.png';
+        return '';
+    }
+}

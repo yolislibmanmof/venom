@@ -1,4 +1,4 @@
-/*! VENOM · Core JS — zero dependency */
+/*! VENOM · Core App Controller (FINAL - slider bug fixed) */
 (function () {
   'use strict';
   var D = document, R = D.documentElement;
@@ -20,52 +20,68 @@
   }
   window.venomToast = toast;
 
-  /* Mode */
-  function setMode(m) {
-    R.setAttribute('data-theme', m); store.set('venom.mode', m);
-    $$('[data-venom="mode"]').forEach(function (b) { b.setAttribute('aria-pressed', m === 'dark'); });
-  }
-  /* Palette */
+  /* Mode / Palette / Particle */
+  function setMode(m) { R.setAttribute('data-theme', m); store.set('venom.mode', m); }
   function setPalette(p) {
     R.setAttribute('data-palette', p); store.set('venom.palette', p);
-    $$('[data-palette-set]').forEach(function (b) {
-      b.classList.toggle('is-on', b.getAttribute('data-palette-set') === p);
+    $$('.vnx-fx-swatch').forEach(function (s) {
+      s.classList.toggle('is-active', s.getAttribute('data-palette') === p);
     });
+    toast('Palet: ' + p);
+  }
+  function setParticle(eff) {
+    R.setAttribute('data-particle', eff); store.set('venom.particle', eff);
+    $$('.vnx-fx-opt[data-particle]').forEach(function (o) {
+      o.classList.toggle('is-active', o.getAttribute('data-particle') === eff);
+    });
+    toast('Efek: ' + eff);
   }
 
   D.addEventListener('DOMContentLoaded', function () {
-    setMode(R.getAttribute('data-theme') === 'dark' ? 'dark' : 'light');
-    setPalette(R.getAttribute('data-palette') || 'venom');
+    setMode(store.get('venom.mode') || (R.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'));
+    setPalette(store.get('venom.palette') || 'venom');
+    var particle = store.get('venom.particle') || 'stars';
+    R.setAttribute('data-particle', particle);
+    $$('.vnx-fx-opt[data-particle]').forEach(function (o) {
+      o.classList.toggle('is-active', o.getAttribute('data-particle') === particle);
+    });
 
-    /* Delegated clicks */
+    /* Delegated clicks: venom actions, palette, particle, copy, modal open/close */
     D.addEventListener('click', function (e) {
-      var t = e.target.closest('[data-venom],[data-palette-set],[data-copy]');
+      var op = e.target.closest('[data-modal-open]');
+      if (op) { var om = D.getElementById(op.getAttribute('data-modal-open')); if (om) om.classList.add('is-open'); return; }
+      var cl = e.target.closest('.vnx-modal [data-close]');
+      if (cl) { var cm = cl.closest('.vnx-modal'); if (cm) cm.classList.remove('is-open'); return; }
+
+      var t = e.target.closest('[data-venom],[data-palette-set],[data-copy],[data-particle]');
       if (!t) return;
-      if (t.hasAttribute('data-palette-set')) { setPalette(t.getAttribute('data-palette-set')); toast('Palet diterapkan'); return; }
+      if (t.hasAttribute('data-palette-set')) { setPalette(t.getAttribute('data-palette-set')); return; }
+      if (t.hasAttribute('data-particle')) { setParticle(t.getAttribute('data-particle')); return; }
       if (t.hasAttribute('data-copy')) {
         var txt = t.getAttribute('data-copy'), sel = $(t.getAttribute('data-copy-target') || '');
         if (sel) txt = sel.innerText;
-        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast('Disalin ke clipboard'); });
+        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(function () { toast('Disalin'); });
         return;
       }
       var a = t.getAttribute('data-venom');
       if (a === 'mode') { setMode(R.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
       else if (a === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); }
-      else if (a === 'palette') { var p = $('#vPalette'); if (p) p.hidden = !p.hidden; }
-      else if (a === 'palette-close') { var pc = $('#vPalette'); if (pc) pc.hidden = true; }
+      else if (a === 'fx-toggle') { var d = $('#vFxD'); if (d) d.classList.toggle('is-open'); }
       else if (a === 'menu') {
         var m = $('#vMenu'), open = m && m.classList.toggle('is-open');
         t.setAttribute('aria-expanded', open ? 'true' : 'false');
       }
     });
 
+    /* Keyboard */
     D.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
-        var p = $('#vPalette'); if (p) p.hidden = true;
         var m = $('#vMenu'); if (m) m.classList.remove('is-open');
+        var fx = $('#vFxD'); if (fx) fx.classList.remove('is-open');
+        $$('.vnx-modal.is-open').forEach(function (x) { x.classList.remove('is-open'); });
       }
       if (e.key === '/' && !/input|textarea|select/i.test(D.activeElement.tagName)) {
-        var s = $('.v-search input') || $('.v-navsearch input');
+        var s = $('.vnx-search-box input') || $('.v-search input');
         if (s) { e.preventDefault(); s.focus(); }
       }
     });
@@ -115,7 +131,7 @@
       cnt.forEach(function (el) { io2.observe(el); });
     }
 
-    /* Tilt (ringan, tanpa library) */
+    /* Tilt */
     if (window.matchMedia('(hover:hover)').matches && !D.body.classList.contains('v-no-motion')) {
       $$('[data-tilt]').forEach(function (el) {
         el.addEventListener('mousemove', function (ev) {
@@ -128,35 +144,56 @@
       });
     }
 
-    /* Hero slider */
-    var hero = $('#vHero');
-    if (hero) {
-      var slides = $$('.v-slide', hero), dots = $$('[data-hero-dot]', hero);
-      var idx = 0, timer = null, gap = parseInt(hero.getAttribute('data-interval'), 10) || 6000;
+    /* ═══════════════════════════════════════════════════
+       PHOTO SLIDER (FIXED: tanpa replaceChild, tanpa error)
+       ═══════════════════════════════════════════════════ */
+    $$('.vnx-slider').forEach(function (slider) {
+      var slides = $$('.vnx-slide', slider);
+      var dots   = $$('.vnx-slide-dot', slider);
+      var prev   = $('.vnx-slide-prev', slider);
+      var next   = $('.vnx-slide-next', slider);
+      var counter= $('.vnx-slide-counter', slider);
+      if (!slides.length) return;
+
+      var idx = 0, timer = null;
+      var gap = parseInt(slider.getAttribute('data-interval'), 10) || 6000;
+
+      function updateCounter() { if (counter) counter.textContent = (idx + 1) + ' / ' + slides.length; }
+
       function go(n) {
-        idx = (n + slides.length) % slides.length;
+        idx = ((n % slides.length) + slides.length) % slides.length;
         slides.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
         dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
+        var act = dots[idx];
+        if (act) { act.classList.remove('is-active'); void act.offsetWidth; act.classList.add('is-active'); }
+        updateCounter();
       }
       function play() { if (slides.length > 1) { stop(); timer = setInterval(function () { go(idx + 1); }, gap); } }
-      function stop() { if (timer) clearInterval(timer); }
+      function stop() { if (timer) { clearInterval(timer); timer = null; } }
+
       dots.forEach(function (d, i) { d.addEventListener('click', function () { go(i); play(); }); });
-      var pv = $('[data-hero="prev"]', hero), nx = $('[data-hero="next"]', hero);
-      if (pv) pv.addEventListener('click', function () { go(idx - 1); play(); });
-      if (nx) nx.addEventListener('click', function () { go(idx + 1); play(); });
-      hero.addEventListener('mouseenter', stop);
-      hero.addEventListener('mouseleave', play);
+      if (prev) prev.addEventListener('click', function () { go(idx - 1); play(); });
+      if (next) next.addEventListener('click', function () { go(idx + 1); play(); });
+      slider.addEventListener('mouseenter', stop);
+      slider.addEventListener('mouseleave', play);
+
       var sx = null;
-      hero.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; stop(); }, { passive: true });
-      hero.addEventListener('touchend', function (e) {
+      slider.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; stop(); }, { passive: true });
+      slider.addEventListener('touchend', function (e) {
         if (sx === null) return;
         var dx = e.changedTouches[0].clientX - sx;
         if (Math.abs(dx) > 45) go(idx + (dx < 0 ? 1 : -1));
         sx = null; play();
       });
+      slider.setAttribute('tabindex', '0');
+      slider.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') { go(idx - 1); play(); }
+        else if (e.key === 'ArrowRight') { go(idx + 1); play(); }
+      });
       D.addEventListener('visibilitychange', function () { D.hidden ? stop() : play(); });
-      play();
-    }
+
+      go(0); play();
+    });
 
     /* Smooth anchor */
     $$('a[href^="#v-"]').forEach(function (a) {

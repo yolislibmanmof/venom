@@ -1,7 +1,18 @@
-<?php defined('INDEX_AUTH') OR die('Direct access not allowed!'); ?>
+<?php
+/**
+ * VENOM · Background Layers (Particles + Orbs + Grid)
+ * Partikel dikontrol via data-particle attribute di <html>
+ */
+defined('INDEX_AUTH') OR die('Direct access not allowed!');
+?>
+
+<!-- Animated Background Orbs & Grid -->
 <div class="v-bg" aria-hidden="true">
-  <span class="v-bg-orb v-bg-orb-1"></span>
-  <span class="v-bg-orb v-bg-orb-2"></span>
-  <span class="v-bg-orb v-bg-orb-3"></span>
-  <span class="v-bg-grid"></span>
+  <div class="v-bg-grid"></div>
+  <div class="v-bg-orb v-bg-orb-1"></div>
+  <div class="v-bg-orb v-bg-orb-2"></div>
+  <div class="v-bg-orb v-bg-orb-3"></div>
 </div>
+
+<!-- Cursor Glow (Desktop only, dari venom-effects.js) -->
+<!-- Auto-created by JS -->
