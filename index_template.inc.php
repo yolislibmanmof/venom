@@ -26,8 +26,8 @@ venom_part('header');
 if (isset($_GET['p']) || isset($_GET['search'])) {
     // handle result search
     if (isset($_GET['search'])) {
-        venom_part('_result-search');
-    } 
+        include __DIR__ . '/parts/_result-search.php';
+    }
     // handle member page
     elseif ($_GET['p'] == 'member') {
         venom_part('_member');
