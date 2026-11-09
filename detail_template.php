@@ -1,17 +1,11 @@
 <?php
 /**
- * VENOM · Detail Koleksi Premium (v3 — Kompatibel variabel FLAT inti SLiMS)
- * Kontrak variabel mengikuti detail_template.php bawaan SLiMS:
- * $biblio_id, $title, $authors(HTML), $image(HTML <img>), $notes, $gmd_name,
- * $availability(HTML), $series_title, $call_number, $publish_place,
- * $publisher_name, $publish_year, $collation, $language_name, $isbn_issn,
- * $classification, $content_type, $media_type, $carrier_type, $edition,
- * $subjects(HTML), $spec_detail_info, $sor, $biblio_custom, $related(HTML), $file_att(HTML)
+ * VENOM · Detail Koleksi Premium (FINAL — Sticky Cover + GMD/Year Tags)
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 require_once __DIR__ . '/helpers/core.php';
 
-/* ═══ 1) NORMALISASI SUMBER DATA (flat → array $detail) ═══ */
+/* Normalisasi sumber data */
 if (!isset($detail) || !is_array($detail) || !isset($detail['title'])) {
     if (!isset($title) || trim((string) $title) === '') {
         $core_content = venom_core_content();
@@ -20,38 +14,19 @@ if (!isset($detail) || !is_array($detail) || !isset($detail['title'])) {
         return;
     }
     $detail = [
-        'biblio_id'         => isset($biblio_id) ? (int) $biblio_id : 0,
-        'title'             => $title,
-        'authors'           => $authors ?? '',
-        'image'             => $image ?? '',
-        'notes'             => $notes ?? '',
-        'gmd_name'          => $gmd_name ?? '',
-        'publish_year'      => $publish_year ?? '',
-        'publish_place'     => $publish_place ?? '',
-        'publisher_name'    => $publisher_name ?? '',
-        'isbn_issn'         => $isbn_issn ?? '',
-        'call_number'       => $call_number ?? '',
-        'collation'         => $collation ?? '',
-        'language_name'     => $language_name ?? '',
-        'classification'    => $classification ?? '',
-        'series_title'      => $series_title ?? '',
-        'edition'           => $edition ?? '',
-        'content_type'      => $content_type ?? '',
-        'media_type'        => $media_type ?? '',
-        'carrier_type'      => $carrier_type ?? '',
-        'spec_detail'       => $spec_detail_info ?? '',
-        'sor'               => $sor ?? '',
-        'subjects_html'     => $subjects ?? '',
-        'availability_html' => $availability ?? '',
-        'file_att'          => $file_att ?? '',
-        'related_html'      => $related ?? '',
-        'biblio_custom'     => $biblio_custom ?? [],
+        'biblio_id' => isset($biblio_id) ? (int) $biblio_id : 0, 'title' => $title, 'authors' => $authors ?? '',
+        'image' => $image ?? '', 'notes' => $notes ?? '', 'gmd_name' => $gmd_name ?? '',
+        'publish_year' => $publish_year ?? '', 'publish_place' => $publish_place ?? '', 'publisher_name' => $publisher_name ?? '',
+        'isbn_issn' => $isbn_issn ?? '', 'call_number' => $call_number ?? '', 'collation' => $collation ?? '',
+        'language_name' => $language_name ?? '', 'classification' => $classification ?? '', 'series_title' => $series_title ?? '',
+        'edition' => $edition ?? '', 'content_type' => $content_type ?? '', 'media_type' => $media_type ?? '',
+        'carrier_type' => $carrier_type ?? '', 'spec_detail' => $spec_detail_info ?? '', 'sor' => $sor ?? '',
+        'subjects_html' => $subjects ?? '', 'availability_html' => $availability ?? '', 'file_att' => $file_att ?? '',
+        'related_html' => $related ?? '', 'biblio_custom' => $biblio_custom ?? [],
     ];
 }
 
-/* ═══ 2) HELPER PARSING AMAN ═══ */
 if (!function_exists('venom_parse_link_chips')) {
-    /** Ubah HTML inti (<a href="?author=...">Nama</a> - Personal Name<br/>) jadi chip bersih. */
     function venom_parse_link_chips($html) {
         $out = [];
         if (preg_match_all('/<a[^>]*href=["\']([^"\']+)["\'][^>]*>(.*?)<\/a>/is', (string) $html, $m, PREG_SET_ORDER)) {
@@ -69,7 +44,6 @@ if (!function_exists('venom_parse_link_chips')) {
     }
 }
 if (!function_exists('venom_resolve_cover')) {
-    /** $image inti bisa berupa tag <img .../> ATAU nama file. Kembalikan URL yang benar. */
     function venom_resolve_cover($image_raw, $title) {
         $s = (string) $image_raw;
         if (stripos($s, '<img') !== false) {
@@ -82,21 +56,20 @@ if (!function_exists('venom_resolve_cover')) {
     }
 }
 
-/* ═══ 3) EKSTRAK NILAI ═══ */
-$v_id       = (int) ($detail['biblio_id'] ?? 0);
-$v_title    = stripslashes((string) ($detail['title'] ?? 'Tanpa Judul'));
-$v_year     = (string) ($detail['publish_year'] ?? '');
-$v_publisher= (string) ($detail['publisher_name'] ?? '');
-$v_place    = (string) ($detail['publish_place'] ?? '');
-$v_isbn     = (string) ($detail['isbn_issn'] ?? '');
-$v_callnum  = (string) ($detail['call_number'] ?? '');
-$v_collation= (string) ($detail['collation'] ?? '');
-$v_notes    = (string) ($detail['notes'] ?? '');
-$v_gmd      = (string) ($detail['gmd_name'] ?? ($detail['gmd'] ?? ''));
-$v_lang     = (string) ($detail['language_name'] ?? '');
-$v_cover    = venom_resolve_cover($detail['image'] ?? '', $v_title);
+$v_id = (int) ($detail['biblio_id'] ?? 0);
+$v_title = stripslashes((string) ($detail['title'] ?? 'Tanpa Judul'));
+$v_year = (string) ($detail['publish_year'] ?? '');
+$v_publisher = (string) ($detail['publisher_name'] ?? '');
+$v_place = (string) ($detail['publish_place'] ?? '');
+$v_isbn = (string) ($detail['isbn_issn'] ?? '');
+$v_callnum = (string) ($detail['call_number'] ?? '');
+$v_collation = (string) ($detail['collation'] ?? '');
+$v_notes = (string) ($detail['notes'] ?? '');
+$v_gmd = (string) ($detail['gmd_name'] ?? ($detail['gmd'] ?? ''));
+$v_lang = (string) ($detail['language_name'] ?? '');
+$v_classification = (string) ($detail['classification'] ?? '');
+$v_cover = venom_resolve_cover($detail['image'] ?? '', $v_title);
 
-/* Penulis → chip (tidak lagi escape mentah) */
 $v_author_chips = venom_parse_link_chips($detail['authors'] ?? '');
 if (!$v_author_chips) {
     $plain = trim(strip_tags(str_replace(['<br />', '<br/>', '<br>'], '; ', (string) ($detail['authors'] ?? ''))));
@@ -109,7 +82,6 @@ if (!$v_author_chips) {
 }
 $v_author_plain = implode('; ', array_map(function ($a) { return $a['name']; }, $v_author_chips));
 
-/* ═══ 4) EKSEMPLAR & KETERSEDIAAN (query langsung, akurat) ═══ */
 $v_items = is_array($detail['items'] ?? null) ? $detail['items'] : [];
 if (!$v_items && $v_id > 0 && Venom_Core::db()) {
     $v_items = venom_rows("SELECT i.item_code, i.call_number, l.location_name,
@@ -123,9 +95,8 @@ if (!$v_items && $v_id > 0 && Venom_Core::db()) {
 }
 $avail_count = 0;
 foreach ($v_items as $it) { if (empty($it['is_loan'])) $avail_count++; }
-$loan_count  = count($v_items) - $avail_count;
+$loan_count = count($v_items) - $avail_count;
 
-/* ═══ 5) TOPIK / SUBJEK ═══ */
 $v_topics = is_array($detail['topics'] ?? null) ? $detail['topics'] : [];
 if (!$v_topics && $v_id > 0 && Venom_Core::db()) {
     $v_topics = venom_rows("SELECT t.topic FROM biblio_topic bt JOIN mst_topic t ON t.topic_id=bt.topic_id
@@ -139,28 +110,21 @@ if (!$v_subject_chips && !empty($detail['subjects_html'])) {
     $v_subject_chips = venom_parse_link_chips($detail['subjects_html']);
 }
 
-/* ═══ 6) METADATA LENGKAP (paritas dengan template default) ═══ */
 $v_extra = [];
 foreach ([
-    'Series Title'      => (string) ($detail['series_title'] ?? ''),
-    'Edition'           => (string) ($detail['edition'] ?? ''),
-    'Classification'    => (string) ($detail['classification'] ?? ''),
-    'Content Type'      => (string) ($detail['content_type'] ?? ''),
-    'Media Type'        => (string) ($detail['media_type'] ?? ''),
-    'Carrier Type'      => (string) ($detail['carrier_type'] ?? ''),
-    'Statement of Responsibility' => (string) ($detail['sor'] ?? ''),
-    'Specific Detail Info'        => (string) ($detail['spec_detail'] ?? ''),
+    'Series Title' => (string) ($detail['series_title'] ?? ''), 'Edition' => (string) ($detail['edition'] ?? ''),
+    'Classification' => (string) ($detail['classification'] ?? ''), 'Content Type' => (string) ($detail['content_type'] ?? ''),
+    'Media Type' => (string) ($detail['media_type'] ?? ''), 'Carrier Type' => (string) ($detail['carrier_type'] ?? ''),
+    'Statement of Responsibility' => (string) ($detail['sor'] ?? ''), 'Specific Detail Info' => (string) ($detail['spec_detail'] ?? ''),
 ] as $lbl => $val) {
     if (trim(strip_tags($val)) !== '' && trim(strip_tags($val)) !== '-') $v_extra[] = [$lbl, $val];
 }
 $v_custom = is_array($detail['biblio_custom'] ?? null) ? $detail['biblio_custom'] : [];
 
-/* ═══ 7) LAMPIRAN & RELATED (HTML inti, dirender aman) ═══ */
 $v_file_att = (string) ($detail['file_att'] ?? '');
 $v_file_att_ok = (trim(strip_tags($v_file_att)) !== '' && stripos($v_file_att, 'No Data') === false && stripos($v_file_att, 'Tidak ada') === false);
 $v_related_html = (string) ($detail['related_html'] ?? '');
 
-/* Related grid VENOM (fallback) */
 $related = [];
 if ($v_id > 0 && !empty($v_topics) && Venom_Core::db()) {
     $topic_ids = [];
@@ -191,8 +155,8 @@ $e_title = venom_e($v_title);
     </nav>
 
     <div class="v-detail-main">
-        <aside class="v-detail-cover">
-            <div class="v-detail-cover-inner" data-tilt>
+        <aside class="v-detail-cover v-detail-cover-sticky">
+            <div class="v-detail-cover-inner" data-tilt data-tilt-max="4" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.12">
                 <img src="<?= venom_e($v_cover) ?>" alt="<?= $e_title ?>" width="600" height="840">
                 <span class="v-detail-cover-shine"></span>
                 <span class="v-detail-cover-spine"></span>
@@ -200,22 +164,34 @@ $e_title = venom_e($v_title);
                     <?= $avail_count > 0 ? $avail_count . ' Tersedia' : (count($v_items) > 0 ? 'Dipinjam' : 'Stok N/A') ?>
                 </span>
             </div>
-            <div class="v-detail-actions">
-                <a class="v-detail-action bookMarkBook" href="javascript:void(0)" data-id="<?= $v_id ?>">
-                    <?= venom_icon('star', 16) ?> Simpan
+            <div class="v-detail-sidebar-actions">
+                <a class="v-detail-side-btn openPopUp citationLink" href="index.php?p=cite&id=<?= $v_id ?>" target="_blank">
+                    <?= venom_icon('quote', 16) ?> Sitasi Koleksi Ini
                 </a>
-                <button class="v-detail-action v-detail-action-primary" data-modal-open="vnxShareModal">
-                    <?= venom_icon('share', 16) ?> Bagikan
-                </button>
-                <button class="v-detail-action" onclick="window.print()"><?= venom_icon('print', 16) ?> Cetak</button>
+                <a class="v-detail-side-btn" href="index.php?p=show_detail&id=<?= $v_id ?>&MARC=true" target="_blank">
+                    <?= venom_icon('code', 16) ?> Unduh MARC
+                </a>
+                <a class="v-detail-side-btn" href="index.php?p=show_detail&id=<?= $v_id ?>&JSONLD=true" target="_blank">
+                    <?= venom_icon('database', 16) ?> Lihat JSON
+                </a>
             </div>
         </aside>
 
         <div class="v-detail-info">
-            <?php if ($v_gmd !== ''): ?>
-                <span class="v-chip v-chip-xs" style="margin-bottom:10px"><?= venom_icon('layers', 12) ?> <?= venom_e($v_gmd) ?></span>
-            <?php endif; ?>
-            <h1><?= $e_title ?></h1>
+            <!-- Tags: GMD + Year + Classification (BARU - dari referensi) -->
+            <div class="v-detail-tags">
+                <?php if ($v_gmd !== ''): ?>
+                    <span class="v-detail-tag"><?= venom_icon('file', 12) ?> <?= venom_e($v_gmd) ?></span>
+                <?php endif; ?>
+                <?php if ($v_year !== ''): ?>
+                    <span class="v-detail-tag v-detail-tag-plain"><?= venom_icon('calendar', 12) ?> <?= venom_e($v_year) ?></span>
+                <?php endif; ?>
+                <?php if ($v_classification !== ''): ?>
+                    <span class="v-detail-tag v-detail-tag-plain"><?= venom_icon('tag', 12) ?> <?= venom_e($v_classification) ?></span>
+                <?php endif; ?>
+            </div>
+
+            <h1 class="v-detail-title"><?= $e_title ?></h1>
 
             <?php if ($v_author_chips): ?>
             <div class="v-detail-authors">
@@ -225,6 +201,17 @@ $e_title = venom_e($v_title);
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>
+
+            <!-- Action buttons -->
+            <div class="v-detail-actions">
+                <a class="v-detail-action bookMarkBook" href="javascript:void(0)" data-id="<?= $v_id ?>">
+                    <?= venom_icon('star', 16) ?> Simpan
+                </a>
+                <button class="v-detail-action" data-modal-open="vnxShareModal">
+                    <?= venom_icon('share', 16) ?> Bagikan
+                </button>
+                <button class="v-detail-action" onclick="window.print()"><?= venom_icon('print', 16) ?> Cetak</button>
+            </div>
 
             <dl class="v-detail-meta">
                 <dt>Penerbit</dt><dd class="v-meta-text"><?= venom_e($v_publisher !== '' ? $v_publisher : '—') ?><?= $v_year !== '' ? ', ' . venom_e($v_year) : '' ?></dd>
@@ -390,6 +377,65 @@ $e_title = venom_e($v_title);
         });
     });
 
+    /* Dropdown menu grid 3 dots */
+    document.querySelectorAll('[data-dd-toggle]').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var id = btn.getAttribute('data-dd-toggle');
+            var menu = document.getElementById(id);
+            var wasOpen = menu.classList.contains('is-open');
+            document.querySelectorAll('.v-book-grid-menu-dropdown.is-open').forEach(function(m){m.classList.remove('is-open')});
+            if (!wasOpen) menu.classList.add('is-open');
+        });
+    });
+    document.addEventListener('click', function(e){
+        if (!e.target.closest('.v-book-grid-menu')) {
+            document.querySelectorAll('.v-book-grid-menu-dropdown.is-open').forEach(function(m){m.classList.remove('is-open')});
+        }
+    });
+
+    /* 3D Tilt Effect untuk grid cards dan detail cover */
+    function initTilt(){
+        document.querySelectorAll('[data-tilt]').forEach(function(el){
+            if (el.dataset.tiltInit) return;
+            el.dataset.tiltInit = '1';
+            var max = parseFloat(el.dataset.tiltMax) || 8;
+            var speed = parseFloat(el.dataset.tiltSpeed) || 300;
+            var glare = el.hasAttribute('data-tilt-glare');
+            var maxGlare = parseFloat(el.dataset.tiltMaxGlare) || 0.1;
+            var scale = parseFloat(el.dataset.tiltScale) || 1;
+            el.style.transition = 'transform ' + speed + 'ms cubic-bezier(.03,.98,.52,.99)';
+            var glareEl = null;
+            if (glare) {
+                glareEl = document.createElement('div');
+                glareEl.className = 'v-tilt-glare';
+                glareEl.style.cssText = 'position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;background:linear-gradient(135deg,rgba(255,255,255,.5),rgba(255,255,255,0));border-radius:inherit';
+                el.style.position = 'relative';
+                el.style.overflow = 'hidden';
+                el.appendChild(glareEl);
+            }
+            el.addEventListener('mousemove', function(e){
+                var r = el.getBoundingClientRect();
+                var x = (e.clientX - r.left) / r.width;
+                var y = (e.clientY - r.top) / r.height;
+                var tiltX = (max * (0.5 - y)).toFixed(2);
+                var tiltY = (max * (x - 0.5)).toFixed(2);
+                el.style.transform = 'perspective(1000px) rotateX(' + tiltX + 'deg) rotateY(' + tiltY + 'deg) scale3d(' + scale + ',' + scale + ',' + scale + ')';
+                if (glareEl) {
+                    glareEl.style.opacity = maxGlare;
+                    glareEl.style.background = 'linear-gradient(' + (Math.atan2(x - 0.5, y - 0.5) * 180 / Math.PI + 135) + 'deg,rgba(255,255,255,' + maxGlare + '),rgba(255,255,255,0))';
+                }
+            });
+            el.addEventListener('mouseleave', function(){
+                el.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1,1,1)';
+                if (glareEl) glareEl.style.opacity = 0;
+            });
+        });
+    }
+    initTilt();
+    var observer = new MutationObserver(initTilt);
+    observer.observe(document.body, {childList:true, subtree:true});
+
     var data = {
         title: <?= json_encode($v_title, $json_flags) ?>,
         author: <?= json_encode($v_author_plain !== '' ? $v_author_plain : 'Tanpa Penulis', $json_flags) ?>,
@@ -403,10 +449,10 @@ $e_title = venom_e($v_title);
     function e(s){ return (s+'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
     function fmt(){
         var st = sel.value, a = e(data.author), t = e(data.title), y = e(data.year), p = e(data.publisher), pl = e(data.place), h = '';
-        if (st === 'apa')            h = a + ' (' + y + '). <em>' + t + '</em>. ' + p + '.';
-        else if (st === 'mla')       h = a + '. <em>' + t + '</em>. ' + p + ', ' + y + '.';
-        else if (st === 'chicago')   h = a + '. <em>' + t + '</em>. ' + (pl ? pl + ': ' : '') + p + ', ' + y + '.';
-        else                         h = a + '. <em>' + t + '</em>. ' + (pl ? pl + ': ' : '') + p + ', ' + y + '.';
+        if (st === 'apa') h = a + ' (' + y + '). <em>' + t + '</em>. ' + p + '.';
+        else if (st === 'mla') h = a + '. <em>' + t + '</em>. ' + p + ', ' + y + '.';
+        else if (st === 'chicago') h = a + '. <em>' + t + '</em>. ' + (pl ? pl + ': ' : '') + p + ', ' + y + '.';
+        else h = a + '. <em>' + t + '</em>. ' + (pl ? pl + ': ' : '') + p + ', ' + y + '.';
         out.innerHTML = h;
     }
     sel.addEventListener('change', fmt);

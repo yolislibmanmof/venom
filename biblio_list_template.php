@@ -1,7 +1,7 @@
 <?php
 /**
- * VENOM · Biblio List Template (v3 — Struktur SLiMS Default + Gaya VENOM)
- * Layout List: Cover(col-2) | Body(col-8) | Availability+Actions(col-2)
+ * VENOM · Biblio List Template (FINAL — Semua Fitur Referensi + VENOM Style)
+ * Fitur: List/Grid/Simple modes, Collection Types tags, 3D Tilt grid, Stagger animation
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 require_once __DIR__ . '/helpers/core.php';
@@ -51,6 +51,16 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
     $v_notes = trim(strip_tags((string) getNotes($dbs, $biblio_id)));
 
     $v_year = trim((string) ($biblio_detail['publish_year'] ?? ''));
+    $v_gmd  = trim((string) ($biblio_detail['gmd'] ?? ''));
+
+    /* Collection Types (BARU - dari referensi) */
+    $v_colltypes = [];
+    $coll_q = $dbs->query('SELECT DISTINCT t.coll_type_name FROM item i LEFT JOIN mst_coll_type t ON t.coll_type_id=i.coll_type_id WHERE i.biblio_id=' . $biblio_id);
+    if ($coll_q) {
+        while ($row = $coll_q->fetch_assoc()) {
+            if (!empty($row['coll_type_name'])) $v_colltypes[] = $row['coll_type_name'];
+        }
+    }
 
     /* Status badge untuk cover */
     $cover_badge = ($availability < 1)
@@ -70,12 +80,15 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
     $view_mode = $_POST['view'] ?? $_GET['view'] ?? $_SESSION['LIST_VIEW'] ?? 'list';
     if (!in_array($view_mode, ['simple', 'list', 'grid'], true)) $view_mode = 'list';
 
+    /* Stagger animation delay */
+    $delay = min((($n % 8) * 70), 560);
+
     /* ═══════════════════════════════════════════════════════
-       MODE LIST (default) — Mengikuti struktur SLiMS default
+       MODE LIST (default)
        Cover(col-2) | Body(col-8) | Availability+Actions(col-2)
        ═══════════════════════════════════════════════════════ */
     if ($view_mode === 'list'):
-        $output .= '<article class="v-result-card v-card">';
+        $output .= '<article class="v-result-card v-card" style="animation-delay:' . $delay . 'ms">';
         $output .= '<div class="v-result-grid">';
 
         /* KOLOM KIRI: Cover */
@@ -99,7 +112,7 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
                  . venom_icon('share', 14) . ' Bagikan</a>';
         $output .= '</div>';
 
-        /* Chip author (tombol outline seperti SLiMS) */
+        /* Chip author */
         if ($_authors_string !== '') {
             $output .= '<div class="v-result-authors">' . $_authors_string . '</div>';
         }
@@ -109,7 +122,19 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
             $output .= '<p class="v-result-notes">' . venom_e(addEllipsis($v_notes, 240)) . '</p>';
         }
 
-        /* Custom fields (DL row seperti SLiMS default) */
+        /* Tags: GMD + Collection Types (BARU - dari referensi) */
+        $tags_html = '';
+        if ($v_gmd !== '') {
+            $tags_html .= '<span class="v-book-tag">' . venom_icon('file', 12) . ' ' . venom_e($v_gmd) . '</span>';
+        }
+        foreach ($v_colltypes as $ct) {
+            $tags_html .= '<span class="v-book-tag v-book-tag-plain">' . venom_icon('folder', 12) . ' ' . venom_e($ct) . '</span>';
+        }
+        if ($tags_html !== '') {
+            $output .= '<div class="v-book-tags">' . $tags_html . '</div>';
+        }
+
+        /* Custom fields (DL row) */
         if (!empty($v_meta)) {
             $output .= '<dl class="v-result-meta">';
             foreach ($v_meta as $m) {
@@ -146,7 +171,7 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
             $ok = ((int) $it['is_available'] === 1);
             $rows .= '<tr><td>' . venom_e($it['item_code'] ?? '-') . '</td><td>' . venom_e($it['call_number'] ?? '-') . '</td><td>' . venom_e($it['location_name'] ?? '-') . '</td><td>' . ($ok ? '<span class="ok-i">✔ Tersedia</span>' : '<span class="no-i">✘ Dipinjam</span>') . '</td></tr>';
         }
-        $output .= '<article class="v-simple-item">';
+        $output .= '<article class="v-simple-item" style="animation-delay:' . $delay . 'ms">';
         $output .= '<div class="v-simple-main"><a class="v-simple-title" href="' . venom_e($detail_url) . '">' . venom_e(addEllipsis($title, 140)) . '</a><div class="v-simple-author">' . venom_e($_authors_plain) . ($v_year !== '' ? ' · ' . venom_e($v_year) : '') . '</div></div>';
         $output .= '<div class="v-avail-wrap">';
         $output .= '<button type="button" class="v-avail-badge ' . ($availability > 0 ? 'ok' : 'no') . '">' . venom_icon($availability > 0 ? 'check' : 'x', 14) . '<span>' . $availability . '</span></button>';
@@ -155,14 +180,31 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
         }
         $output .= '</div></article>';
 
-    /* ═══════ MODE GRID ═══════ */
+    /* ═══════ MODE GRID (dengan 3D Tilt + Dropdown Menu 3 Dots - dari referensi) ═══════ */
     else:
-        $output .= '<article class="v-book">';
+        $output .= '<article class="v-book" data-tilt data-tilt-max="4" data-tilt-speed="300" data-tilt-glare data-tilt-max-glare="0.12" data-tilt-scale="1.01" style="animation-delay:' . $delay . 'ms">';
+        
+        /* Dropdown menu 3 dots (BARU - dari referensi) */
+        $output .= '<div class="v-book-grid-menu">';
+        $output .= '<button type="button" class="v-book-grid-menu-btn" data-dd-toggle="grid-menu-' . $biblio_id . '">';
+        $output .= '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>';
+        $output .= '</button>';
+        $output .= '<div class="v-book-grid-menu-dropdown" id="grid-menu-' . $biblio_id . '">';
+        $output .= '<a class="add-to-chart-button" data-biblio="' . $biblio_id . '" href="javascript:void(0)">' . venom_icon('plus', 14) . ' Keranjang</a>';
+        $output .= '<a class="openPopUp citationLink" href="' . venom_e($cite_url) . '" target="_blank">' . venom_icon('quote', 14) . ' Sitasi</a>';
+        $output .= '<div class="v-book-grid-menu-divider"></div>';
+        $output .= '<a href="' . venom_e($detail_url) . '&MARC=true" target="_blank">' . venom_icon('code', 14) . ' MARC</a>';
+        $output .= '</div></div>';
+
         $output .= '<a class="v-book-cover" href="' . venom_e($detail_url) . '"><img loading="lazy" src="' . venom_e($cover_url) . '" alt="cover" decoding="async"><span class="v-book-shine"></span>' . $cover_badge . '<span class="v-book-hover">' . venom_icon('right', 18) . ' Lihat Detail</span></a>';
         $output .= '<div class="v-book-body">';
         $output .= '<h3 class="v-book-title"><a href="' . venom_e($detail_url) . '">' . venom_e(addEllipsis($title, 80)) . '</a></h3>';
         $output .= '<div class="v-book-author">' . venom_e($_authors_plain) . '</div>';
-        $output .= '<div class="v-book-foot"><span class="v-chip v-chip-xs">' . venom_e($v_year !== '' ? $v_year : '—') . '</span></div>';
+        $output .= '<div class="v-book-foot"><span class="v-chip v-chip-xs">' . venom_e($v_year !== '' ? $v_year : '—') . '</span>';
+        if ($v_gmd !== '') {
+            $output .= '<span class="v-chip v-chip-xs v-chip-plain">' . venom_e($v_gmd) . '</span>';
+        }
+        $output .= '</div>';
         $output .= '</div></article>';
     endif;
 

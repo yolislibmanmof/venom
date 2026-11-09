@@ -417,3 +417,49 @@
   .v-ctype-pill{min-width:calc(50% - 8px);flex:1 1 calc(50% - 8px)}
   .v-ddc-item{padding:14px}
 }
+/* ═══════ Book Tags (GMD + Collection Types) ═══════ */
+.v-book-tags{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.v-book-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:999px;background:color-mix(in srgb,var(--v-p) 10%,transparent);color:var(--v-p);font-size:.72rem;font-weight:600}
+.v-book-tag svg{width:11px;height:11px}
+.v-book-tag-plain{background:var(--v-surf2);color:var(--v-mut)}
+
+/* ═══════ Detail Tags (GMD + Year + Classification) ═══════ */
+.v-detail-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.v-detail-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:linear-gradient(120deg,color-mix(in srgb,var(--v-p) 15%,transparent),color-mix(in srgb,var(--v-a) 15%,transparent));color:var(--v-p);font-size:.76rem;font-weight:700;letter-spacing:.02em}
+.v-detail-tag svg{width:13px;height:13px}
+.v-detail-tag-plain{background:var(--v-surf2);color:var(--v-mut)}
+
+/* ═══════ Grid Card 3D Tilt ═══════ */
+.v-book[data-tilt]{position:relative;transform-style:preserve-3d;transition:transform .3s cubic-bezier(.03,.98,.52,.99)}
+.v-tilt-glare{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .3s;border-radius:inherit;z-index:2}
+
+/* ═══════ Grid Dropdown Menu 3 Dots ═══════ */
+.v-book-grid-menu{position:absolute;top:8px;right:8px;z-index:10}
+.v-book-grid-menu-btn{width:32px;height:32px;border-radius:50%;border:0;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);color:#fff;cursor:pointer;display:grid;place-items:center;transition:.2s}
+.v-book-grid-menu-btn:hover{background:rgba(0,0,0,.7);transform:scale(1.1)}
+.v-book-grid-menu-dropdown{position:absolute;top:calc(100% + 6px);right:0;min-width:160px;padding:6px;border-radius:10px;background:var(--v-surf);border:1px solid var(--v-line);box-shadow:var(--v-sh2);display:none;flex-direction:column;gap:2px;animation:vnxModalIn .15s ease}
+.v-book-grid-menu-dropdown.is-open{display:flex}
+.v-book-grid-menu-dropdown a{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;color:var(--v-tx);text-decoration:none;font-size:.82rem;font-weight:500;transition:.15s}
+.v-book-grid-menu-dropdown a:hover{background:color-mix(in srgb,var(--v-p) 10%,transparent);color:var(--v-p)}
+.v-book-grid-menu-divider{height:1px;background:var(--v-line);margin:4px 0}
+
+/* ═══════ Sticky Cover Sidebar (Detail) ═══════ */
+.v-detail-cover-sticky{position:sticky;top:90px;align-self:start}
+.v-detail-sidebar-actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.v-detail-side-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:var(--v-glass);border:1px solid var(--v-gline);backdrop-filter:blur(12px);color:var(--v-tx);text-decoration:none;font-size:.86rem;font-weight:600;transition:.2s}
+.v-detail-side-btn:hover{border-color:var(--v-p);color:var(--v-p);transform:translateX(4px)}
+.v-detail-side-btn svg{width:16px;height:16px;flex:0 0 auto}
+
+/* ═══════ Stagger Animation ═══════ */
+@keyframes venomCardIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.v-result-card,.v-simple-item,.v-book{animation:venomCardIn .5s ease backwards}
+
+/* ═══════ Responsive: Detail mobile ═══════ */
+@media (max-width:900px){
+  .v-detail-cover-sticky{position:static}
+  .v-detail-sidebar-actions{flex-direction:row;flex-wrap:wrap}
+  .v-detail-side-btn{flex:1;justify-content:center;font-size:.78rem}
+}
