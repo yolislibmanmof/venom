@@ -75,3 +75,11 @@ $sysconf['template']['classic_search_size'] = 'medium';
 $sysconf['template']['classic_footer_show'] = 1;
 $sysconf['template']['classic_member_area'] = 1;
 $sysconf['template']['classic_color_toggle'] = 'auto_show';
+
+// Default contact configuration
+if (!isset($sysconf['template']['contact'])) {
+    $sysconf['template']['contact'] = [
+        'wa' => '',  // Format: 6281234567890 (tanpa + atau spasi)
+        'email' => '' // Format: library@example.com
+    ];
+}

@@ -1,16 +1,17 @@
 <?php
 /**
  * VENOM · Konfigurasi tema. Ubah di sini, tidak perlu sentuh kode lain.
+ * CATATAN: File ini HARUS murni return array. JANGAN taruh fungsi di sini!
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 
 return [
-'brand' => [
-    'name'    => 'VENOM',
-    'tagline' => 'Ultimate Library Experience',
-    'logo'    => '',   
-    'favicon' => '',   
-],
+    'brand' => [
+        'name'    => 'VENOM',
+        'tagline' => 'Ultimate Library Experience',
+        'logo'    => '',
+        'favicon' => '',
+    ],
 
     'ui' => [
         'palette'   => 'venom',
@@ -31,15 +32,15 @@ return [
 
     'features' => [
         // ─── Fitur Inti ───
-        'hero' => true, 
-        'stats' => true, 
-        'new_arrivals' => true, 
-        'featured' => true, 
-        'topics' => true, 
-        'news' => true, 
-        'fab' => true, 
+        'hero' => true,
+        'stats' => true,
+        'new_arrivals' => true,
+        'featured' => true,
+        'topics' => true,
+        'news' => true,
+        'fab' => true,
         'palette_switcher' => true,
-        
+
         // ─── Fitur Tahap 2: FX & Interaksi ───
         'cursor_glow' => true,
         'particles' => true,
@@ -47,19 +48,19 @@ return [
         'live_ticker' => true,
         'floating_chat' => true,
         'mobile_bottom_nav' => true,
-        
-        // ─── ✅ Fitur Baru Tahap 3: Eksplorasi Koleksi (dari Pustaka Ceria) ───
-        'ddc_browse'      => true,   // Grid 10 kelas DDC (000-900) dengan warna per kelas
-        'category_cards'  => true,   // 3 Card kategori (Tipe Material / Jenis / Lokasi)
-        'ctype_pills'     => true,   // Pills 5 tipe koleksi terbesar
-        
-        // ─── Opsi Tambahan (Opsional) ───
-        'member_cta'      => true,   // CTA "Belum Jadi Anggota?"
+
+        // ─── Fitur Tahap 3: Eksplorasi Koleksi ───
+        'ddc_browse'      => true,
+        'category_cards'  => true,
+        'ctype_pills'     => true,
+
+        // ─── Opsi Tambahan ───
+        'member_cta'      => true,
     ],
 
     'prayer' => [
-        'city' => 'Jakarta',  // Ganti dengan kota Anda (e.g., 'Surabaya', 'Bandung')
-        'method' => 11,       // 11 = Kemenag RI
+        'city'   => 'Jakarta',
+        'method' => 11,
     ],
 
     'hero' => [
@@ -90,11 +91,11 @@ return [
     ],
 
     'contact' => [
-        'wa' => '6281234567890', // Ganti dengan nomor WA perpustakaan (format: 628xxx)
-        'telegram' => '',         // Username Telegram tanpa @
-        'email' => '', 
-        'phone' => '', 
-        'address' => '',
+        'wa'       => '6281234567890',
+        'telegram' => '',
+        'email'    => '',
+        'phone'    => '',
+        'address'  => '',
     ],
 
     'social' => [
@@ -108,5 +109,5 @@ return [
     ],
 
     'limits' => ['new' => 10, 'featured' => 10, 'topics' => 14, 'news' => 3],
-    'debug' => false,
+    'debug'  => false,
 ];

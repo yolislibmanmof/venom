@@ -463,3 +463,12 @@
   .v-detail-sidebar-actions{flex-direction:row;flex-wrap:wrap}
   .v-detail-side-btn{flex:1;justify-content:center;font-size:.78rem}
 }
+/* Toast Notification */
+.v-toast{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;align-items:center;gap:12px;padding:16px 24px;background:var(--v-glass);backdrop-filter:blur(16px);border:1px solid var(--v-gline);border-radius:12px;box-shadow:var(--v-sh2);transform:translateY(100px);opacity:0;transition:all .3s ease;max-width:400px}
+.v-toast-show{transform:translateY(0);opacity:1}
+.v-toast-icon{width:24px;height:24px;flex-shrink:0}
+.v-toast-info .v-toast-icon{background:var(--v-p);mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E") center/contain no-repeat}
+.v-toast-success .v-toast-icon{background:var(--v-ok);mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/contain no-repeat}
+.v-toast-error .v-toast-icon{background:var(--v-err);mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M15 9l-6 6M9 9l6 6'/%3E%3C/svg%3E") center/contain no-repeat}
+.v-toast-message{font-size:.95rem;font-weight:600;color:var(--v-tx);line-height:1.4}
+@media (max-width:600px){.v-toast{left:16px;right:16px;bottom:16px;max-width:none}}
