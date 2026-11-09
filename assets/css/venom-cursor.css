@@ -1,0 +1,17 @@
+/* VENOM · Custom Cursor Styles */
+body.venom-custom-cursor-active,
+body.venom-custom-cursor-active a,
+body.venom-custom-cursor-active button,
+body.venom-custom-cursor-active [role="button"],
+body.venom-custom-cursor-active label { cursor: none !important; }
+body.venom-custom-cursor-active input,
+body.venom-custom-cursor-active textarea,
+body.venom-custom-cursor-active select,
+body.venom-custom-cursor-active iframe { cursor: auto !important; }
+
+.venom-cursor-icon-canvas,
+.venom-cursor-trail-canvas {
+  position: fixed; inset: 0; width: 100%; height: 100%;
+  z-index: 2147483646; pointer-events: none;
+}
+.venom-cursor-trail-canvas { z-index: 2147483645; }

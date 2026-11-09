@@ -52,6 +52,20 @@ $vog  = $vlogo !== '' ? $vlogo : 'data:image/svg+xml;base64,' . base64_encode('<
 <link rel="stylesheet" href="<?= venom_e(venom_asset('css/venom-detail.css')) ?>">
 <link rel="stylesheet" href="<?= venom_e(venom_asset('css/venom-member.css')) ?>">
 <link rel="manifest" href="<?= venom_e(venom_asset('manifest.json.php')) ?>">
+<?php if (isset($_GET['search']) && defined('JWB')): ?>
+<link rel="stylesheet" href="<?= JWB ?>ion.rangeSlider/css/ion.rangeSlider.min.css">
+<?php endif; ?>
+
+<!-- ═══ PATCH AMAN: Muat CSS Animasi Background & Kursor Custom ═══ -->
+<link rel="stylesheet" href="<?= venom_e(venom_asset('css/venom-bg-animations.css')) ?>">
+<link rel="stylesheet" href="<?= venom_e(venom_asset('css/venom-cursor.css')) ?>">
+<?php 
+// Render custom background CSS hanya jika fungsi tersedia (mencegah error fatal)
+if (function_exists('venom_render_custom_background_css')) {
+    echo venom_render_custom_background_css();
+}
+?>
+
 <?= venom_core_head() ?>
 </head>
 <body class="v-body<?= venom_on('motion') ? '' : ' v-no-motion' ?>" data-page="<?= venom_e(venom_page()) ?>">

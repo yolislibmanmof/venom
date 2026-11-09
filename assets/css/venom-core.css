@@ -18,7 +18,7 @@
   --v-sh:0 10px 30px rgba(0,0,0,.4);--v-sh2:0 24px 70px rgba(0,0,0,.6);
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body.v-body{margin:0;background:var(--v-bg);color:var(--v-tx);font-family:var(--v-fs);line-height:1.65;overflow-x:hidden;transition:background .35s,color .35s}
+body.v-body{margin:0;background:var(--v-bg);color:var(--v-tx);font-family:var(--v-fs);line-height:1.65;overflow-x:clip;transition:background .35s,color .35s}
 img{max-width:100%;display:block}
 a{color:inherit;text-decoration:none}
 h1,h2,h3,h4{margin:0 0 .4em;line-height:1.2;letter-spacing:-.02em}

@@ -44,6 +44,24 @@ final class Venom_Core
     }
 }
 
+/**
+ * Baca konfigurasi: DB (admin) → config.php statis → default.
+ * Dengan ini venom_cfg('features.hero') mengikuti nilai admin bila ada.
+ */
+if (!function_exists('venom_cfg_resolved')) {
+    function venom_cfg_resolved($path, $default = null) {
+        $parts = explode('.', $path);
+        $first = array_shift($parts);
+        // Coba ambil dari $sysconf['template'] dengan prefix venom_ + key
+        $sys = isset($GLOBALS['sysconf']) ? $GLOBALS['sysconf'] : [];
+        $tmpl = isset($sys['template']) ? $sys['template'] : [];
+        $key = 'venom_' . $first . ($parts ? '_' . implode('_', $parts) : '');
+        if (array_key_exists($key, $tmpl)) return $tmpl[$key];
+        // Fallback ke config.php
+        return venom_cfg($path, $default);
+    }
+}
+
 /** Base URL aplikasi (tanpa bergantung konstanta tertentu). */
 function venom_base_url()
 {

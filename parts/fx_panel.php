@@ -1,7 +1,7 @@
 <?php
 /**
  * VENOM · FX Control Panel
- * Floating sidebar untuk ganti efek partikel + palet warna
+ * Floating sidebar untuk ganti efek partikel + palet warna + animasi background + ikon kursor
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 
@@ -25,9 +25,34 @@ $effects = [
   ['key' => 'confetti',  'label' => 'Confetti','icon' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="4" height="4"/><rect x="12" y="8" width="4" height="4"/><rect x="8" y="16" width="4" height="4"/><rect x="16" y="14" width="4" height="4"/></svg>'],
   ['key' => 'none',      'label' => 'Nonaktif','icon' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M21 21H3"/></svg>'],
 ];
+
+$curAnim = venom_cfg('hero.animation', 'none');
+$anims = [
+  ['none','Nonaktif'],
+  ['particles','Glyphs'],
+  ['rain','Rain'],
+  ['grid','Grid'],
+  ['twinkle','Twinkle'],
+  ['zen-ripples','Ripples'],
+  ['neural-network','Neural'],
+  ['starfield-warp','Warp'],
+  ['floating-embers','Embers']
+];
+
+$curIcon = venom_cfg('hero.cursor_icon', 'default');
+$icons = [
+  ['default','Default'],
+  ['neon-comet','Neon'],
+  ['pixel-sword','Sword'],
+  ['electric-bolt','Bolt'],
+  ['ink-brush','Brush'],
+  ['rainbow-ribbon','Rainbow']
+];
 ?>
 
-<!-- Floating FX Toggle Button -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FLOATING FX TOGGLE BUTTON (di luar drawer)                     -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="vnx-fx-panel">
   <button type="button" class="vnx-fx-btn" data-venom="fx-toggle" aria-label="Buka panel efek" title="Efek Visual">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,7 +62,9 @@ $effects = [
   </button>
 </div>
 
-<!-- FX Drawer -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- FX DRAWER (semua section di DALAM drawer)                      -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <div class="vnx-fx-drawer" id="vFxD">
   <div class="vnx-fx-drawer-head">
     <h3 class="vnx-fx-drawer-title">Efek Visual</h3>
@@ -46,6 +73,31 @@ $effects = [
     </button>
   </div>
 
+  <!-- SECTION 1: Animasi Background -->
+  <div class="vnx-fx-section">
+    <div class="vnx-fx-label">Animasi Background</div>
+    <div class="vnx-fx-options">
+      <?php foreach ($anims as $a): ?>
+        <button type="button" class="vnx-fx-opt<?= $a[0] === $curAnim ? ' is-active' : '' ?>" data-venom-bg-anim="<?= $a[0] ?>">
+          <span><?= $a[1] ?></span>
+        </button>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <!-- SECTION 2: Ikon Kursor -->
+  <div class="vnx-fx-section">
+    <div class="vnx-fx-label">Ikon Kursor</div>
+    <div class="vnx-fx-options">
+      <?php foreach ($icons as $ic): ?>
+        <button type="button" class="vnx-fx-opt<?= $ic[0] === $curIcon ? ' is-active' : '' ?>" data-venom-cursor-icon="<?= $ic[0] ?>">
+          <span><?= $ic[1] ?></span>
+        </button>
+      <?php endforeach; ?>
+    </div>
+  </div>
+
+  <!-- SECTION 3: Efek Partikel -->
   <div class="vnx-fx-section">
     <div class="vnx-fx-label">Efek Partikel</div>
     <div class="vnx-fx-options">
@@ -58,6 +110,7 @@ $effects = [
     </div>
   </div>
 
+  <!-- SECTION 4: Palet Warna -->
   <div class="vnx-fx-section">
     <div class="vnx-fx-label">Palet Warna</div>
     <div class="vnx-fx-palettes">
@@ -73,3 +126,10 @@ $effects = [
     </div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- TOMBOL KUSTOMISASI TEMA (FAB di luar drawer FX)                -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if ((int) venom_cfg('features.palette_switcher', 1) === 1): ?>
+<?php venom_part('theme_viewer'); ?>
+<?php endif; ?>

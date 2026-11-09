@@ -25,3 +25,14 @@ $template_info = $venom_meta;
 $theme_info    = $venom_meta;
 $tinfo         = $venom_meta;
 $template      = $venom_meta;
+
+/* ═══════════════════════════════════════════════════════════════
+   PENAMBAHAN: Registrasi skema customizer ke inti SLiMS 9.8
+   File-file ini mengisi $sysconf['template']['option']['venom']
+   agar dialog "Pengaturan Tema" di admin menampilkan formulir.
+   ═══════════════════════════════════════════════════════════════ */
+if (defined('INDEX_AUTH') && INDEX_AUTH == 1) {
+    require_once __DIR__ . '/helpers/tinfo_options_helper.php';
+    require_once __DIR__ . '/helpers/tinfo_defaults.php';
+    require_once __DIR__ . '/helpers/tinfo_options.php';
+}

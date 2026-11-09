@@ -1,4 +1,4 @@
-/*! VENOM · Core App Controller (FINAL - slider bug fixed) */
+/*! VENOM · Core App Controller (FINAL - Production Ready + FX Integration) */
 (function () {
   'use strict';
   var D = document, R = D.documentElement;
@@ -46,17 +46,53 @@
       o.classList.toggle('is-active', o.getAttribute('data-particle') === particle);
     });
 
-    /* Delegated clicks: venom actions, palette, particle, copy, modal open/close */
+    /* Inisialisasi Background Animation & Cursor dari localStorage */
+    var bgAnim = store.get('venom.bg-anim') || 'none';
+    R.setAttribute('data-venom-bg-anim', bgAnim);
+    $$('.vnx-fx-opt[data-venom-bg-anim]').forEach(function (o) {
+      o.classList.toggle('is-active', o.getAttribute('data-venom-bg-anim') === bgAnim);
+    });
+
+    var cursorIcon = store.get('venom.cursor-icon') || 'default';
+    R.setAttribute('data-venom-cursor-icon', cursorIcon);
+    $$('.vnx-fx-opt[data-venom-cursor-icon]').forEach(function (o) {
+      o.classList.toggle('is-active', o.getAttribute('data-venom-cursor-icon') === cursorIcon);
+    });
+
+    /* Delegated clicks: venom actions, palette, particle, copy, modal open/close, bg-anim, cursor */
     D.addEventListener('click', function (e) {
       var op = e.target.closest('[data-modal-open]');
       if (op) { var om = D.getElementById(op.getAttribute('data-modal-open')); if (om) om.classList.add('is-open'); return; }
       var cl = e.target.closest('.vnx-modal [data-close]');
       if (cl) { var cm = cl.closest('.vnx-modal'); if (cm) cm.classList.remove('is-open'); return; }
 
-      var t = e.target.closest('[data-venom],[data-palette-set],[data-copy],[data-particle]');
+      var t = e.target.closest('[data-venom],[data-palette-set],[data-copy],[data-particle],[data-venom-bg-anim],[data-venom-cursor-icon]');
       if (!t) return;
       if (t.hasAttribute('data-palette-set')) { setPalette(t.getAttribute('data-palette-set')); return; }
       if (t.hasAttribute('data-particle')) { setParticle(t.getAttribute('data-particle')); return; }
+      
+      /* Handler untuk Background Animation */
+      if (t.hasAttribute('data-venom-bg-anim')) {
+        var a = t.getAttribute('data-venom-bg-anim');
+        R.setAttribute('data-venom-bg-anim', a); store.set('venom.bg-anim', a);
+        $$('.vnx-fx-opt[data-venom-bg-anim]').forEach(function (o) {
+          o.classList.toggle('is-active', o.getAttribute('data-venom-bg-anim') === a);
+        });
+        toast('Animasi: ' + a);
+        return;
+      }
+      
+      /* Handler untuk Cursor Icon */
+      if (t.hasAttribute('data-venom-cursor-icon')) {
+        var ic = t.getAttribute('data-venom-cursor-icon');
+        R.setAttribute('data-venom-cursor-icon', ic); store.set('venom.cursor-icon', ic);
+        $$('.vnx-fx-opt[data-venom-cursor-icon]').forEach(function (o) {
+          o.classList.toggle('is-active', o.getAttribute('data-venom-cursor-icon') === ic);
+        });
+        toast('Cursor: ' + ic);
+        return;
+      }
+      
       if (t.hasAttribute('data-copy')) {
         var txt = t.getAttribute('data-copy'), sel = $(t.getAttribute('data-copy-target') || '');
         if (sel) txt = sel.innerText;
@@ -145,8 +181,10 @@
     }
 
     /* ═══════════════════════════════════════════════════
-       PHOTO SLIDER (FIXED: tanpa replaceChild, tanpa error)
+       PHOTO SLIDER (FINAL PATCHED: Anti Memory Leak)
        ═══════════════════════════════════════════════════ */
+    var sliderControllers = [];
+    
     $$('.vnx-slider').forEach(function (slider) {
       var slides = $$('.vnx-slide', slider);
       var dots   = $$('.vnx-slide-dot', slider);
@@ -190,10 +228,18 @@
         if (e.key === 'ArrowLeft') { go(idx - 1); play(); }
         else if (e.key === 'ArrowRight') { go(idx + 1); play(); }
       });
-      D.addEventListener('visibilitychange', function () { D.hidden ? stop() : play(); });
 
+      sliderControllers.push({ stop: stop, play: play });
       go(0); play();
     });
+
+    if (sliderControllers.length > 0) {
+        D.addEventListener('visibilitychange', function () {
+            sliderControllers.forEach(function(ctrl) {
+                D.hidden ? ctrl.stop() : ctrl.play();
+            });
+        });
+    }
 
     /* Smooth anchor */
     $$('a[href^="#v-"]').forEach(function (a) {

@@ -1,0 +1,40 @@
+/* VENOM · Background Animation CSS */
+.venom-background-animation-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.venom-background-animation-layer.is-static{background:none !important}
+.venom-bg-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+
+/* Moving Grid */
+.venom-moving-grid{position:absolute;inset:-50%;width:200%;height:200%;
+  background-image:linear-gradient(rgba(var(--v-p-rgb,.8) .12) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(var(--v-p-rgb,.8) .12) 1px,transparent 1px);
+  background-size:60px 60px;animation:venom-grid-move 24s linear infinite}
+@keyframes venom-grid-move{from{transform:translate(0,0)}to{transform:translate(60px,60px)}}
+
+/* Twinkling Stars */
+.venom-star{position:absolute;border-radius:50%;animation:venom-twinkle 2s ease-in-out infinite}
+@keyframes venom-twinkle{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.8);box-shadow:0 0 12px currentColor}}
+
+/* Floating Glyphs (particles-style text) */
+.venom-token{position:absolute;font-family:'Courier New',monospace;font-weight:700;opacity:.55;pointer-events:auto;
+  animation:venom-float 12s ease-in-out infinite;transition:transform .5s,color .3s,text-shadow .3s}
+@keyframes venom-float{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(var(--tx,0),var(--ty,-30px)) rotate(var(--rot,180deg))}}
+
+/* Floating Embers */
+.venom-ember{position:absolute;border-radius:50%;filter:blur(.6px);opacity:var(--op,.4);
+  animation:venom-ember-rise 15s linear infinite}
+@keyframes venom-ember-rise{0%{transform:translateY(0) translateX(0);opacity:0}
+  10%{opacity:var(--op,.4)}90%{opacity:var(--op,.4)}
+  100%{transform:translateY(-100vh) translateX(var(--x-drift,0));opacity:0}}
+
+/* Hero animation canvas */
+.venom-hero-animation-layer{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.venom-hero-animation-canvas{position:absolute;inset:0;width:100%;height:100%}
+
+/* Background image layer */
+.venom-background-image-layer{position:fixed;inset:0;z-index:-1;background-size:cover;background-position:center;background-attachment:fixed;transition:filter .4s,transform .4s}
+[data-theme="dark"] .venom-background-image-layer{filter:brightness(.7) saturate(.85)}
+
+/* Reduced motion fallback */
+.venom-reduced-motion .venom-moving-grid,.venom-reduced-motion .venom-token,
+.venom-reduced-motion .venom-star,.venom-reduced-motion .venom-ember{animation:none !important}
+.venom-save-data .venom-moving-grid{animation-duration:60s}

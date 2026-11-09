@@ -45,6 +45,9 @@ function venom_icon($name, $size = 20, $class = '')
         'palette'  => '<path d="M12 3a9 9 0 1 0 0 18c1.7 0 2-1.2 1.3-2.2-.8-1.2 0-2.8 1.5-2.8H18a3 3 0 0 0 3-3 9 9 0 0 0-9-10z"/><circle cx="8.5" cy="10" r="1.2"/><circle cx="12" cy="7.5" r="1.2"/><circle cx="15.5" cy="10" r="1.2"/>',
         'layers'   => '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
         'news'     => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h7M7 13h10M7 16h6"/>',
+        'plus'     => '<path d="M12 5v14M5 12h14"/>',
+        'file'     => '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+        'code'     => '<path d="M8 9l-4 3 4 3M16 9l4 3-4 3"/>',
     ];
     if (!isset($p[$name])) $name = 'book';
     $s = (int) $size;

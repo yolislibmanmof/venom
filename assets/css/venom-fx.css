@@ -334,3 +334,52 @@
 }
 /* ─── CANVAS PARTICLE LAYER (v2) ─── */
 #vnxCanvas{position:fixed;inset:0;z-index:-1;pointer-events:none}
+
+/* FIX: Palette tidak terpotong */
+.vnx-fx-drawer {
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.vnx-fx-palettes {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+  max-width: 100% !important;
+}
+
+.vnx-fx-swatch {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* FIX: Animasi background layer harus visible */
+.venom-background-animation-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+/* FIX: Cursor icon layer */
+.venom-cursor-icon-canvas,
+.venom-cursor-trail-canvas {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9999 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+/* FIX: WhatsApp floating button - sembunyikan elemen biru tersembunyi */
+.btn-floating-whatsapp,
+.floating-chat-widget {
+  z-index: 100 !important;
+}
+
+.btn-floating-whatsapp [style*="display: none"],
+.floating-chat-widget [style*="display: none"] {
+  display: none !important;
+}

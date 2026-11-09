@@ -86,7 +86,7 @@ $vphone = (string) venom_cfg('contact.phone', '');
   </div>
 </footer>
 
-<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════════════════════════ -->
 <!-- FLOATING UI COMPONENTS                                         -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 
@@ -116,9 +116,31 @@ $vphone = (string) venom_cfg('contact.phone', '');
 <!-- Toast Notification -->
 <div class="v-toast" id="vToast"></div>
 
-<!-- Scripts -->
+<!-- Scripts (URUTAN FINAL — tanpa defer untuk engine FX) -->
+<?php
+/* ═══ CETAK ASET JS INTI SLiMS v2 (rantai fallback anti-kosong) ═══ */
+$v_js_tags = Venom_Core::get('js', '');
+if (!is_string($v_js_tags) || trim($v_js_tags) === '') {
+    $v_js_tags = isset($GLOBALS['js']) ? (string) $GLOBALS['js'] : '';
+}
+if (!is_string($v_js_tags) || trim($v_js_tags) === '') {
+    $v_js_tags = (string) Venom_Core::get('js_tags', Venom_Core::get('core_js', ''));
+}
+if (is_string($v_js_tags) && trim($v_js_tags) !== '') {
+    echo $v_js_tags;
+}
+?>
+
+<!-- Load FX engines WITHOUT defer - they need to run immediately -->
+<script src="<?= venom_e(venom_asset('js/venom-motion-lifecycle.js')) ?>"></script>
+<script src="<?= venom_e(venom_asset('js/venom-bg-animations.js')) ?>"></script>
+<script src="<?= venom_e(venom_asset('js/venom-cursor-icons.js')) ?>"></script>
+<script src="<?= venom_e(venom_asset('js/venom-cursor-trail.js')) ?>"></script>
+
+<!-- App and FX panel can be deferred -->
 <script src="<?= venom_e(venom_asset('js/venom-app.js')) ?>" defer></script>
 <script src="<?= venom_e(venom_asset('js/venom-fx.js')) ?>" defer></script>
+
 <?= venom_core_foot() ?>
 </body>
 </html>

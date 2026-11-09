@@ -11,7 +11,12 @@ require_once __DIR__ . '/helpers/core.php';
 Venom_Core::register(get_defined_vars());
 
 // setup list view (PENTING: Ini yang dibaca oleh biblio_list_template.php)
-$_SESSION['LIST_VIEW'] = $_POST['view'] ?? $_SESSION['LIST_VIEW'] ?? 'grid';
+$req_view = $_POST['view'] ?? $_GET['view'] ?? null;
+if ($req_view !== null && in_array((string) $req_view, ['simple', 'list', 'grid'], true)) {
+    $_SESSION['LIST_VIEW'] = (string) $req_view;
+} elseif (!in_array($_SESSION['LIST_VIEW'] ?? '', ['simple', 'list', 'grid'], true)) {
+    $_SESSION['LIST_VIEW'] = 'grid';
+}
 
 venom_part('header');
 
