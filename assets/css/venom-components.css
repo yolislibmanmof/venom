@@ -182,3 +182,238 @@
     padding:18px;overflow:auto;transform:translateX(-105%);transition:transform .3s;border-radius:0 var(--v-r) var(--v-r) 0;box-shadow:var(--v-sh2)}
   .vnx-results-sidebar.is-open{transform:translateX(0)}
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   VENOM · Result Card (List Mode) — Struktur SLiMS Default
+   Cover(col-2) | Body(col-8) | Availability+Actions(col-2)
+   ═══════════════════════════════════════════════════════════════ */
+
+.v-list-books{display:flex;flex-direction:column;gap:16px}
+.v-result-card{padding:0;overflow:hidden;transition:transform .25s,box-shadow .25s}
+.v-result-card:hover{transform:translateY(-3px);box-shadow:var(--v-sh2)}
+
+.v-result-grid{
+  display:grid;
+  grid-template-columns:130px 1fr 180px;
+  gap:0;
+  align-items:stretch;
+}
+
+/* Cover (col kiri) */
+.v-result-cover{position:relative;aspect-ratio:auto;overflow:hidden;background:var(--v-bg2)}
+.v-result-cover a{display:block;width:100%;height:100%;text-decoration:none}
+.v-result-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+.v-result-card:hover .v-result-cover img{transform:scale(1.05)}
+
+/* Body (col tengah) */
+.v-result-body{padding:18px 22px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.v-result-title{margin:0;font-size:1.05rem;font-weight:700;line-height:1.35}
+.v-result-title a{color:var(--v-tx);text-decoration:none;transition:color .2s}
+.v-result-title a:hover{color:var(--v-p)}
+
+/* Quick actions row: Comment / Bookmark / Share */
+.v-result-quick-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:4px 0}
+.v-qa-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:4px 2px;
+  color:var(--v-mut);text-decoration:none;font-size:.78rem;font-weight:600;
+  transition:color .2s;cursor:pointer;border:0;background:none;
+}
+.v-qa-btn:hover{color:var(--v-p)}
+.v-qa-btn.is-bookmarked{color:var(--v-ok)}
+.v-qa-btn svg{flex:0 0 auto}
+
+/* Author chips (btn outline seperti SLiMS default) */
+.v-result-authors{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0}
+.v-author-btn{
+  display:inline-flex;align-items:center;gap:5px;padding:5px 12px;
+  border-radius:999px;border:1px solid var(--v-line);background:transparent;
+  color:var(--v-tx);text-decoration:none;font-size:.78rem;font-weight:600;
+  transition:.2s;
+}
+.v-author-btn:hover{border-color:var(--v-p);color:var(--v-p);background:color-mix(in srgb,var(--v-p) 6%,transparent)}
+
+.v-result-notes{color:var(--v-mut);font-size:.85rem;line-height:1.55;margin:4px 0}
+
+/* Custom fields DL (ala SLiMS default) */
+.v-result-meta{
+  display:grid;grid-template-columns:auto 1fr;gap:6px 14px;
+  margin:8px 0 0;padding:10px 14px;
+  background:var(--v-surf2);border:1px solid var(--v-line);border-radius:10px;
+  font-size:.82rem;
+}
+.v-result-meta dt{
+  color:var(--v-mut);font-weight:700;font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.04em;margin:0;
+}
+.v-result-meta dd{color:var(--v-tx);font-weight:600;margin:0;word-break:break-word}
+.v-result-meta dd.is-empty{color:var(--v-mut);font-style:italic}
+
+/* Side (col kanan) */
+.v-result-side{
+  padding:18px 16px;display:flex;flex-direction:column;gap:8px;
+  background:var(--v-surf2);border-left:1px solid var(--v-line);
+}
+
+.v-avail-card{
+  padding:14px 12px;border-radius:12px;text-align:center;
+  background:var(--v-glass);border:1px solid var(--v-line);
+}
+.v-avail-card.ok{background:color-mix(in srgb,var(--v-ok) 8%,transparent);border-color:color-mix(in srgb,var(--v-ok) 25%,transparent)}
+.v-avail-card.no{background:color-mix(in srgb,var(--v-err) 6%,transparent);border-color:color-mix(in srgb,var(--v-err) 20%,transparent)}
+.v-avail-label{display:block;font-size:.64rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--v-mut)}
+.v-avail-value{display:block;font-size:1.8rem;font-weight:800;line-height:1;margin-top:4px}
+.v-avail-card.ok .v-avail-value{color:var(--v-ok)}
+.v-avail-card.no .v-avail-value{color:var(--v-err)}
+
+.v-side-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  padding:9px 12px;border-radius:10px;border:1px solid var(--v-line);
+  background:var(--v-surf);color:var(--v-tx);font-size:.78rem;font-weight:700;
+  text-decoration:none;transition:.2s;cursor:pointer;
+}
+.v-side-btn:hover{border-color:var(--v-p);color:var(--v-p);transform:translateY(-1px)}
+.v-side-btn svg{flex:0 0 auto;color:var(--v-p)}
+
+/* Badge di cover list */
+.v-book-badge{
+  position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:999px;
+  font-size:.66rem;font-weight:800;letter-spacing:.04em;color:#fff;
+  display:inline-flex;align-items:center;gap:4px;z-index:2;
+}
+.v-badge-ok{background:linear-gradient(120deg,var(--v-ok),#34d399)}
+.v-badge-no{background:linear-gradient(120deg,#ef4444,#f97316)}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .v-result-grid{grid-template-columns:110px 1fr;grid-template-rows:auto auto}
+  .v-result-cover{grid-row:1/3}
+  .v-result-side{
+    grid-column:2;grid-row:2;
+    flex-direction:row;flex-wrap:wrap;gap:6px;
+    border-left:0;border-top:1px solid var(--v-line);padding:12px;
+  }
+  .v-avail-card{flex:1;min-width:80px}
+  .v-side-btn{flex:1;min-width:80px}
+  .v-side-btn span{display:none}
+}
+@media (max-width: 560px) {
+  .v-result-grid{grid-template-columns:1fr;grid-template-rows:auto}
+  .v-result-cover{aspect-ratio:3/4;max-width:200px;margin:0 auto}
+  .v-result-body{padding:14px 16px}
+  .v-result-side{flex-direction:column;border-top:1px solid var(--v-line)}
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VENOM · Fitur Baru: DDC, Kategori, Pills, Popular
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── DDC GRID (10 kelas 000-900) ─── */
+.v-ddc-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;
+}
+.v-ddc-item{
+  position:relative;display:flex;flex-direction:column;gap:8px;
+  padding:18px;border-radius:var(--v-r);
+  background:var(--v-glass);border:1px solid var(--v-gline);
+  backdrop-filter:blur(12px);box-shadow:var(--v-sh);
+  text-decoration:none;color:inherit;transition:all .3s;
+  overflow:hidden;
+}
+.v-ddc-item::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--ddc-color);transition:height .3s;
+}
+.v-ddc-item:hover{transform:translateY(-5px);box-shadow:var(--v-sh2)}
+.v-ddc-item:hover::before{height:40px;opacity:.15}
+.v-ddc-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:4px;
+}
+.v-ddc-ico{
+  width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--ddc-color) 15%,transparent);
+  color:var(--ddc-color);flex:0 0 auto;
+}
+.v-ddc-code{
+  font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ddc-color);
+}
+.v-ddc-title{margin:0;font-size:1.02rem;font-weight:800;color:var(--v-tx);line-height:1.3}
+.v-ddc-desc{color:var(--v-mut);font-size:.8rem;line-height:1.4}
+.v-ddc-count{
+  margin-top:auto;padding-top:8px;font-style:normal;font-size:.78rem;
+  font-weight:700;color:var(--ddc-color);
+}
+
+/* ─── CATEGORY CARDS (3 grup: Tipe Material / Jenis / Lokasi) ─── */
+.v-cat-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;
+}
+.v-cat-card{
+  background:var(--v-glass);border:1px solid var(--v-gline);border-radius:var(--v-r);
+  backdrop-filter:blur(12px);box-shadow:var(--v-sh);overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.v-cat-head{
+  display:flex;align-items:center;gap:14px;padding:18px 20px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--v-p) 8%,transparent),transparent);
+  border-bottom:1px solid var(--v-line);
+}
+.v-cat-icon{
+  width:46px;height:46px;border-radius:13px;display:grid;place-items:center;
+  color:#fff;background:linear-gradient(135deg,var(--v-p),var(--v-a));
+  box-shadow:0 8px 20px color-mix(in srgb,var(--v-p) 35%,transparent);flex:0 0 auto;
+}
+.v-cat-head strong{display:block;font-size:1rem;font-weight:800;color:var(--v-tx)}
+.v-cat-head small{color:var(--v-mut);font-size:.78rem;font-weight:600}
+.v-cat-list{
+  list-style:none;margin:0;padding:8px 0;max-height:340px;overflow-y:auto;
+  scrollbar-width:thin;
+}
+.v-cat-list::-webkit-scrollbar{width:5px}
+.v-cat-list::-webkit-scrollbar-thumb{background:var(--v-line);border-radius:3px}
+.v-cat-list li{margin:0}
+.v-cat-list a{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  padding:10px 20px;color:var(--v-tx);text-decoration:none;font-size:.88rem;
+  font-weight:500;transition:background .2s,color .2s;border-left:3px solid transparent;
+}
+.v-cat-list a:hover{
+  background:color-mix(in srgb,var(--v-p) 6%,transparent);
+  color:var(--v-p);border-left-color:var(--v-p);
+}
+.v-cat-count{
+  font-size:.72rem;font-weight:800;padding:3px 9px;border-radius:999px;
+  background:color-mix(in srgb,var(--v-p) 12%,transparent);color:var(--v-p);
+  flex:0 0 auto;
+}
+
+/* ─── COLLECTION TYPE PILLS ─── */
+.v-ctype-pills{
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+}
+.v-ctype-pill{
+  display:flex;align-items:center;gap:10px;padding:12px 18px;
+  border-radius:14px;background:var(--v-glass);border:1px solid var(--v-gline);
+  backdrop-filter:blur(10px);box-shadow:var(--v-sh);
+  text-decoration:none;color:var(--v-tx);transition:.25s;flex:1;min-width:200px;max-width:280px;
+}
+.v-ctype-pill:hover{
+  transform:translateY(-3px);border-color:var(--v-p);color:var(--v-p);
+  box-shadow:var(--v-sh2);
+}
+.v-ctype-icon{
+  width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--v-p) 12%,transparent);color:var(--v-p);flex:0 0 auto;
+}
+.v-ctype-text{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.v-ctype-text strong{font-size:.88rem;font-weight:700;color:var(--v-tx)}
+.v-ctype-text small{font-size:.72rem;color:var(--v-mut);font-weight:600}
+.v-ctype-pill:hover .v-ctype-text strong{color:var(--v-p)}
+.v-ctype-pill > svg:last-child{color:var(--v-mut);flex:0 0 auto;transition:transform .2s}
+.v-ctype-pill:hover > svg:last-child{transform:translateX(4px);color:var(--v-p)}
+
+@media (max-width: 640px) {
+  .v-cat-list a{padding:10px 16px;font-size:.82rem}
+  .v-ctype-pill{min-width:calc(50% - 8px);flex:1 1 calc(50% - 8px)}
+  .v-ddc-item{padding:14px}
+}

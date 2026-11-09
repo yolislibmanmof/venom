@@ -1,10 +1,14 @@
-/*! VENOM · Background Animation Engine (7 variants: 3 canvas + 4 CSS) */
+/*! VENOM · Background Animation Engine (FINAL ULTRA-ROBUST) */
 (function () {
   'use strict';
-  var D = document, W = window;
+  var D = document, W = window, R = D.documentElement;
   var $ = function (s, r) { return (r || D).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || D).querySelectorAll(s)); };
-  var ML = W.VenomMotionLifecycle || { subscribe: function () {} };
+  var ML = W.VenomMotionLifecycle || { 
+    subscribe: function () {}, 
+    prefersReducedMotion: function() { return false; }, 
+    prefersReducedData: function() { return false; } 
+  };
   var glyphs = 'VENOM0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ@#$%&*';
 
   function hexRgb(h) {
@@ -16,10 +20,10 @@
   function rgba(rgb, a) { return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'; }
 
   function currentColors() {
-    var cs = getComputedStyle(D.documentElement);
+    var cs = getComputedStyle(R);
     var p = cs.getPropertyValue('--v-p').trim() || '#7c3aed';
     var a = cs.getPropertyValue('--v-a').trim() || '#22d3ee';
-    var isDark = D.documentElement.getAttribute('data-theme') === 'dark';
+    var isDark = R.getAttribute('data-theme') === 'dark';
     var rgbP = hexRgb(p), rgbA = hexRgb(a);
     return {
       primary: p, accent: a, rgbP: rgbP, rgbA: rgbA, isDark: isDark,
@@ -79,8 +83,10 @@
   }
 
   function initAnimation(layer) {
-    var anim = layer.getAttribute('data-animation') || 'none';
-    var speed = parseFloat(layer.getAttribute('data-speed-multiplier')) || 1;
+    var anim = layer.getAttribute('data-animation') || R.getAttribute('data-venom-bg-anim') || 'none';
+    var speed = parseFloat(layer.getAttribute('data-speed-multiplier') || '1');
+    layer.setAttribute('data-animation', anim);
+    
     if (anim === 'none') { layer.classList.add('is-static'); return; }
     if (ML.prefersReducedMotion()) { layer.classList.add('is-static'); return; }
     if (ML.prefersReducedData()) { layer.classList.add('is-static', 'is-data-saver'); return; }
@@ -90,7 +96,6 @@
     var rand = function (a, b) { return a + Math.random() * (b - a); };
     var randInt = function (a, b) { return Math.floor(rand(a, b + 1)); };
 
-    /* ── NEURAL NETWORK (canvas) ── */
     if (anim === 'neural-network') {
       var nodes = [];
       layer._venomCleanup = startCanvas(layer, function (ctx, getW, getH) {
@@ -104,6 +109,7 @@
         function frame(ctx, w, h) {
           ctx.clearRect(0, 0, w, h);
           var maxDist = lite ? 108 : 136;
+          var maxDistSq = maxDist * maxDist;
           for (var i = 0; i < nodes.length; i++) {
             var n = nodes[i];
             n.x += n.vx; n.y += n.vy;
@@ -111,8 +117,9 @@
             if (n.y < 0) { n.y = 0; n.vy *= -1; } else if (n.y > h) { n.y = h; n.vy *= -1; }
             for (var j = i + 1; j < nodes.length; j++) {
               var o = nodes[j];
-              var dist = Math.hypot(n.x - o.x, n.y - o.y);
-              if (dist < maxDist) {
+              var dx = n.x - o.x, dy = n.y - o.y;
+              if (dx * dx + dy * dy < maxDistSq) {
+                var dist = Math.sqrt(dx * dx + dy * dy);
                 var ratio = 1 - dist / maxDist;
                 ctx.strokeStyle = rgba(colors.rgbA, ratio * 0.75);
                 ctx.lineWidth = ratio * 1.5 + 0.4;
@@ -130,7 +137,6 @@
       return;
     }
 
-    /* ── STARFIELD WARP (canvas) ── */
     if (anim === 'starfield-warp') {
       var stars = [];
       layer._venomCleanup = startCanvas(layer, function (ctx, getW, getH) {
@@ -143,7 +149,7 @@
         function frame(ctx, w, h) {
           ctx.fillStyle = colors.isDark ? 'rgba(0,0,0,.08)' : 'rgba(255,255,255,.08)';
           ctx.fillRect(0, 0, w, h);
-          var cx = w / 2, cy = h / 2, speed = 2.4 / speed;
+          var cx = w / 2, cy = h / 2, speed = 2.4;
           for (var i = 0; i < stars.length; i++) {
             var s = stars[i];
             s.z -= speed;
@@ -160,7 +166,6 @@
       return;
     }
 
-    /* ── ZEN RIPPLES (canvas) ── */
     if (anim === 'zen-ripples') {
       var ripples = [];
       layer._venomCleanup = startCanvas(layer, function (ctx, getW, getH) {
@@ -168,7 +173,7 @@
         function resize(w, h) {
           var count = lite ? 5 : 8;
           ripples = Array.from({ length: count }, function (_, i) {
-            return { x: rand(.2 * w, .8 * w), y: rand(.2 * h, .8 * h), r: (i / count) * maxR, dr: rand(.4, .8) / speed, alpha: 1 };
+            return { x: rand(.2 * w, .8 * w), y: rand(.2 * h, .8 * h), r: (i / count) * maxR, dr: rand(.4, .8), alpha: 1 };
           });
         }
         function frame(ctx, w, h) {
@@ -187,7 +192,6 @@
       return;
     }
 
-    /* ── CSS: Moving Grid ── */
     if (anim === 'grid') {
       var el = D.createElement('div');
       el.className = 'venom-moving-grid';
@@ -196,7 +200,6 @@
       return;
     }
 
-    /* ── CSS: Twinkling Stars ── */
     if (anim === 'twinkle') {
       var count = lite ? 24 : 64;
       var frag = D.createDocumentFragment();
@@ -216,7 +219,6 @@
       return;
     }
 
-    /* ── CSS: Floating Glyphs ── */
     if (anim === 'particles' || anim === 'floating-glyphs') {
       var count = lite ? 14 : 32;
       var frag = D.createDocumentFragment();
@@ -239,7 +241,6 @@
       return;
     }
 
-    /* ── CSS: Floating Embers ── */
     if (anim === 'floating-embers') {
       var count = lite ? 18 : 42;
       var frag = D.createDocumentFragment();
@@ -263,8 +264,32 @@
   }
 
   function refresh() {
-    $$('.venom-background-animation-layer, .venom-hero-animation-layer').forEach(function (l) {
-      if (l.getAttribute('data-animation')) initAnimation(l);
+    var layers = $$('.venom-background-animation-layer');
+    
+    // ✅ AUTO-CREATE layer jika TIDAK ADA di DOM (solusi anti-gagal)
+    if (layers.length === 0) {
+      console.log('[VENOM FX] Layer tidak ditemukan, membuat otomatis...');
+      var newLayer = D.createElement('div');
+      newLayer.id = 'venom-bg-animation-layer';
+      newLayer.className = 'venom-background-animation-layer';
+      newLayer.setAttribute('aria-hidden', 'true');
+      // Copy atribut dari <html>
+      var currentAnim = R.getAttribute('data-venom-bg-anim') || 'none';
+      newLayer.setAttribute('data-animation', currentAnim);
+      newLayer.setAttribute('data-speed-multiplier', '1');
+      
+      // Sisipkan setelah .v-bg atau di awal body
+      var bgEl = $('.v-bg');
+      if (bgEl && bgEl.parentNode) {
+        bgEl.parentNode.insertBefore(newLayer, bgEl.nextSibling);
+      } else if (D.body) {
+        D.body.insertBefore(newLayer, D.body.firstChild);
+      }
+      layers = [newLayer];
+    }
+    
+    layers.forEach(function (l) {
+      initAnimation(l);
     });
   }
 
@@ -274,10 +299,15 @@
   if (D.readyState === 'loading') D.addEventListener('DOMContentLoaded', refresh, { once: true });
   else refresh();
 
-  // Re-init on palette/theme change
   new MutationObserver(function (ms) {
+    var shouldRefresh = false;
     ms.forEach(function (m) {
-      if (m.attributeName === 'data-palette' || m.attributeName === 'data-theme') refresh();
+      if (m.attributeName === 'data-palette' || 
+          m.attributeName === 'data-theme' || 
+          m.attributeName === 'data-venom-bg-anim') {
+        shouldRefresh = true;
+      }
     });
-  }).observe(D.documentElement, { attributes: true });
+    if (shouldRefresh) refresh();
+  }).observe(R, { attributes: true });
 })();

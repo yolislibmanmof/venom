@@ -1,7 +1,7 @@
-/*! VENOM · Custom Cursor Icons (5 variants) */
+/*! VENOM · Custom Cursor Icons (5 variants) - FINAL FIX */
 (function () {
   'use strict';
-  var D = document, W = window;
+  var D = document, W = window, R = D.documentElement;
   var MODES = [
     { id: 'neon-comet', color: '#22d3ee', accent: '#7c5cff' },
     { id: 'pixel-sword', color: '#a3e635', accent: '#4ade80' },
@@ -39,8 +39,14 @@
     if (typeof cleanup === 'function') { cleanup(); cleanup = null; }
     var body = D.body; if (!body) return;
     if (reducedMotion() || !pointerIsFine()) { body.classList.remove('venom-custom-cursor-active'); return; }
-    var modeId = body.getAttribute('data-venom-cursor-icon') || 'default';
-    if (modeId === 'default' || modeId === 'none' || modeId === '0') { body.classList.remove('venom-custom-cursor-active'); return; }
+    
+    // ✅ FIX KRUSIAL: Baca dari <html> (R), BUKAN dari <body>
+    var modeId = R.getAttribute('data-venom-cursor-icon') || 'default';
+    
+    if (modeId === 'default' || modeId === 'none' || modeId === '0') { 
+      body.classList.remove('venom-custom-cursor-active'); 
+      return; 
+    }
     var data = findMode(modeId); var mode = data.mode;
 
     injectStyles();
@@ -71,7 +77,7 @@
     }
 
     function currentPalette() {
-      var isDark = D.documentElement.getAttribute('data-theme') === 'dark';
+      var isDark = R.getAttribute('data-theme') === 'dark';
       var rgb = hexRgb(mode.color);
       return { rgb: rgb, rgbA: hexRgb(mode.accent), color: mode.color, accent: mode.accent, isDark: isDark };
     }
@@ -158,5 +164,5 @@
   if (rm && rm.addEventListener) rm.addEventListener('change', init);
   new MutationObserver(function (ms) {
     ms.forEach(function (m) { if (m.attributeName === 'data-venom-cursor-icon') init(); });
-  }).observe(D.documentElement, { attributes: true });
+  }).observe(R, { attributes: true });
 })();

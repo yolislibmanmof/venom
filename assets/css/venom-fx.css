@@ -383,3 +383,112 @@
 .floating-chat-widget [style*="display: none"] {
   display: none !important;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   VENOM · FINAL Z-INDEX FIX — WhatsApp & Floating Elements
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ✅ FIX: WhatsApp widget HARUS di atas semua FAB */
+.v-chat-widget {
+  z-index: 9990 !important;
+  position: fixed;
+}
+
+.v-chat-widget .v-chat-btn {
+  z-index: 9991 !important;
+  position: relative;
+}
+
+/* ✅ FIX: Theme Viewer FAB geser ke KIRI (tidak menumpuk WhatsApp) */
+.vnx-theme-fab {
+  position: fixed !important;
+  right: auto !important;
+  left: 84px !important;
+  bottom: 24px !important;
+  z-index: 90 !important;
+}
+
+/* ✅ FIX: FX Panel tombol (gear icon) */
+.vnx-fx-panel {
+  right: 24px !important;
+  z-index: 85 !important;
+}
+
+/* ✅ FIX: Mobile Bottom Nav di atas FAB lain */
+.v-mobile-nav {
+  z-index: 100 !important;
+}
+
+/* ✅ FIX: FAB scroll-to-top (kiri) */
+.v-fab {
+  z-index: 90 !important;
+  left: 24px !important;
+}
+
+/* ✅ FIX: Cursor glow di bawah canvas cursor */
+.v-cursor-glow {
+  z-index: 2 !important;
+}
+
+/* ✅ FIX: Canvas particle layer */
+#vnxCanvas {
+  z-index: 0 !important;
+}
+
+/* ✅ FIX: Background animation layer */
+.venom-background-animation-layer {
+  z-index: 1 !important;
+}
+
+/* Responsive fix untuk mobile */
+@media (max-width: 768px) {
+  .vnx-theme-fab {
+    left: 16px !important;
+    bottom: 150px !important;   
+    width: 48px !important;
+    height: 48px !important;
+  }
+  
+  .vnx-fx-panel {
+    right: 16px !important;
+    bottom: 90px !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  
+  .v-chat-widget {
+    bottom: 90px !important;
+  }
+  
+  .v-fab {
+    left: 16px !important;
+    bottom: 90px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .vnx-fx-panel {
+    bottom: 100px !important;
+  }
+
+  .vnx-theme-fab {
+    bottom: 160px !important;   /* panah di 100px → palet di atasnya */
+  }
+
+  .v-chat-widget {
+    bottom: 100px !important;
+  }
+
+  .v-fab {
+    bottom: 100px !important;
+  }
+}
+
+/* ✅ FIX: palet yang sebelumnya tidak punya aturan CSS */
+[data-palette="crimson"]{--v-p:#e11d48;--v-a:#f59e0b}
+[data-palette="ocean"]{--v-p:#0284c7;--v-a:#22d3ee}
+[data-palette="mono"]{--v-p:#475569;--v-a:#94a3b8}
+
+/* Nomor grup pada drawer Theme Viewer */
+.vnx-theme-gnum{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,var(--v-p),var(--v-a));color:#fff;font-size:.68rem;font-weight:800;margin-right:8px}

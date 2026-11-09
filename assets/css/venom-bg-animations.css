@@ -38,3 +38,30 @@
 .venom-reduced-motion .venom-moving-grid,.venom-reduced-motion .venom-token,
 .venom-reduced-motion .venom-star,.venom-reduced-motion .venom-ember{animation:none !important}
 .venom-save-data .venom-moving-grid{animation-duration:60s}
+
+/* ═══════════════════════════════════════════════════════════════
+   VENOM · Background Animation Layer - ALWAYS VISIBLE FIX
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Layer harus SELALU ada, bahkan saat animasi 'none' */
+.venom-background-animation-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+
+/* State 'none' atau 'static' - layer kosong tapi tetap ada */
+.venom-background-animation-layer.is-static {
+  background: none !important;
+}
+
+/* Canvas harus mengisi penuh layer */
+.venom-bg-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}

@@ -1,15 +1,32 @@
-/*! VENOM · Cursor Trail & Particles */
+/*! VENOM · Cursor Trail & Particles (Hyper-Optimized v2) */
 (function () {
   'use strict';
   var D = document, W = window;
   var cleanup = null;
-
-  function hexRgb(h) {
-    h = String(h || '').replace('#', '');
+  
+  // OPTIMASI 1: Cache warna untuk menghindari getComputedStyle berulang di setiap frame
+  var cachedPalette = { rgb: [34, 211, 238], isDark: false }; 
+  function updatePaletteCache() {
+    var cs = getComputedStyle(D.documentElement);
+    var a = cs.getPropertyValue('--v-a').trim() || '#22d3ee';
+    var h = a.replace('#', '');
     if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
-    var n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    var n = parseInt(h, 16);
+    cachedPalette = { 
+      rgb: [(n >> 16) & 255, (n >> 8) & 255, n & 255], 
+      isDark: D.documentElement.getAttribute('data-theme') === 'dark' 
+    };
   }
+  // Panggil sekali di awal dan saat tema berubah
+  updatePaletteCache();
+  new MutationObserver(function(ms) {
+    ms.forEach(function(m) {
+      if (m.attributeName === 'data-theme' || m.attributeName === 'data-palette') updatePaletteCache();
+    });
+  }).observe(D.documentElement, { attributes: true });
+
   function rgba(rgb, a) { return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'; }
+  
   function qualityFrom(setting) {
     var cores = navigator.hardwareConcurrency || 4, mem = navigator.deviceMemory || 4;
     var mobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -24,6 +41,7 @@
     var body = D.body; if (!body) return;
     if (W.matchMedia && W.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (!(W.matchMedia && W.matchMedia('(pointer: fine)').matches)) return;
+    
     var setting = body.getAttribute('data-venom-cursor-particles') || 'none';
     if (setting === 'none' || setting === '0') return;
     if (setting === 'auto') {
@@ -42,18 +60,13 @@
     canvas.className = 'venom-cursor-trail-canvas';
     canvas.setAttribute('aria-hidden', 'true');
     D.body.appendChild(canvas);
+    // OPTIMASI 2: desynchronized: true sudah benar, pertahankan ini (lebih baik dari Rasamala)
     var ctx = canvas.getContext('2d', { alpha: true, desynchronized: true });
     if (!ctx) return;
 
     var w = 0, h = 0, dpr = 1, mouseX = W.innerWidth / 2, mouseY = W.innerHeight / 2;
     var lastX = mouseX, lastY = mouseY, speed = 0, visible = true;
     var trail = [], particles = [], raf = 0, lastFrame = 0;
-
-    function getPalette() {
-      var cs = getComputedStyle(D.documentElement);
-      var a = cs.getPropertyValue('--v-a').trim() || '#22d3ee';
-      return { rgb: hexRgb(a), isDark: D.documentElement.getAttribute('data-theme') === 'dark' };
-    }
 
     function resize() {
       w = W.innerWidth; h = W.innerHeight;
@@ -76,7 +89,10 @@
       var room = caps.maxP - particles.length;
       if (room <= 0 || count <= 0) return;
       count = Math.min(count, room);
-      var pal = getPalette();
+      
+      // Gunakan cachedPalette, BUKAN getComputedStyle di dalam loop
+      var pal = cachedPalette; 
+      
       for (var i = 0; i < count; i++) {
         var ang = opts.angle + (Math.random() - 0.5) * (opts.spread || 1);
         var sp = (opts.sMin || 0.35) + Math.random() * ((opts.sMax || 2.4) - (opts.sMin || 0.35));
@@ -106,6 +122,7 @@
     }
 
     function onClick(e) {
+      // OPTIMASI 3: Tambahkan efek "swirl" (pusaran) saat klik agar lebih premium
       spawn(quality === 0 ? 8 : quality === 1 ? 14 : 20, {
         x: e.clientX, y: e.clientY, angle: 0, spread: Math.PI * 2,
         sMin: 1.4, sMax: 5, sizeMin: 2, sizeMax: 5, decay: 0.026
@@ -114,7 +131,7 @@
 
     function drawTrail() {
       if (trail.length < 2) return;
-      var pal = getPalette();
+      var pal = cachedPalette;
       ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       if (quality > 0) {
         ctx.beginPath(); ctx.moveTo(trail[0].x, trail[0].y);

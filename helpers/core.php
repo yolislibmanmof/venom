@@ -46,8 +46,77 @@ Venom_Sec::headers();
 
 /* ── Konfigurasi & aset ───────────────────────────────────────────── */
 
+/**
+ * Baca konfigurasi dengan prioritas:
+ * 1) Nilai tersimpan Admin/DB ($sysconf['template'][...] atau $sysconf[...])
+ * 2) helpers/config.php
+ * 3) $default
+ */
 function venom_cfg($path, $default = null)
 {
+    /* Peta: path config → kunci opsi Admin (tinfo_schema) */
+    static $map = [
+        'ui.palette'                  => 'venom_theme_color',
+        'ui.mode'                     => 'venom_mode',
+        'ui.font'                     => 'venom_font_family',
+        'ui.container'                => 'venom_container_width',
+        'ui.radius'                   => 'venom_border_radius',
+        'ui.glass'                    => 'venom_glass_effect',
+        'ui.motion'                   => 'venom_motion',
+        'custom_css'                  => 'venom_custom_css',
+        'features.hero'               => 'venom_hero_show',
+        'hero.interval'               => 'venom_hero_interval',
+        'features.stats'              => 'venom_stats_show',
+        'features.new_arrivals'       => 'venom_new_arrivals_show',
+        'features.featured'           => 'venom_featured_show',
+        'features.topics'             => 'venom_topics_show',
+        'features.news'               => 'venom_news_show',
+        'limits.new'                  => 'venom_new_arrivals_limit',
+        'limits.featured'             => 'venom_featured_limit',
+        'limits.topics'               => 'venom_topics_limit',
+        'limits.news'                 => 'venom_news_limit',
+        'particle.default'            => 'venom_particles',
+        'hero.animation_speed'        => 'venom_animation_speed',
+        'hero.animation'              => 'venom_hero_animation',
+        'hero.background_style'       => 'venom_hero_background_style',
+        'hero.background_custom'      => 'venom_hero_background_custom',
+        'hero.cursor_icon'            => 'venom_cursor_icon',
+        'hero.cursor_particles'       => 'venom_cursor_particles',
+        'navbar.menu'                 => 'venom_navbar_menu',
+        'navbar.languages'            => 'venom_language_visible',
+        'features.mobile_bottom_nav'  => 'venom_mobile_nav_show',
+        'features.back_to_top'        => 'venom_back_to_top',
+        'features.fab'                => 'venom_fab_show',
+        'features.palette_switcher'   => 'venom_palette_switcher_show',
+        'features.floating_chat'      => 'venom_floating_chat_show',
+        'features.live_ticker'        => 'venom_live_ticker_show',
+        'features.prayer_times'       => 'venom_prayer_times_show',
+        'prayer.city'                 => 'venom_prayer_city',
+        'contact.wa'                  => 'venom_whatsapp_number',
+        'contact.wa_text'             => 'venom_whatsapp_text',
+        'social.facebook'             => 'venom_social_facebook',
+        'social.instagram'            => 'venom_social_instagram',
+        'social.youtube'              => 'venom_social_youtube',
+        'social.twitter'              => 'venom_social_twitter',
+        'contact.email'               => 'venom_contact_email',
+        'contact.phone'               => 'venom_contact_phone',
+        'contact.address'             => 'venom_contact_address',
+    ];
+
+    /* 1) Override dari Admin/DB (dukung dua bentuk penyimpanan SLiMS) */
+    if (isset($map[$path])) {
+        $sys = isset($GLOBALS['sysconf']) && is_array($GLOBALS['sysconf']) ? $GLOBALS['sysconf'] : [];
+        $k   = $map[$path];
+        $val = null;
+        if (isset($sys['template']) && is_array($sys['template']) && array_key_exists($k, $sys['template']) && $sys['template'][$k] !== '' && $sys['template'][$k] !== null) {
+            $val = $sys['template'][$k];
+        } elseif (array_key_exists($k, $sys) && $sys[$k] !== '' && $sys[$k] !== null) {
+            $val = $sys[$k];
+        }
+        if ($val !== null) return $val;
+    }
+
+    /* 2) Fallback ke helpers/config.php */
     $c = isset($GLOBALS['venom_config']) ? $GLOBALS['venom_config'] : [];
     foreach (explode('.', $path) as $seg) {
         if (!is_array($c) || !array_key_exists($seg, $c)) return $default;
@@ -265,6 +334,106 @@ function venom_stats()
         }
         return $s;
     });
+}
+
+/* ── Klasifikasi DDC (000-900) — hitung koleksi per kelas dari call number ── */
+if (!function_exists('venom_ddc_counts')) {
+    function venom_ddc_counts() {
+        return venom_cached('ddc_counts', 600, function () {
+            $counts = array_fill(0, 10, 0);
+            $db = Venom_Core::db();
+            if (!$db) return $counts;
+            $q = $db->query("SELECT LEFT(call_number,1) AS d, COUNT(*) AS c FROM biblio
+                              WHERE call_number IS NOT NULL AND call_number REGEXP '^[0-9]'
+                              GROUP BY d");
+            if ($q) {
+                while ($r = $q->fetch_assoc()) {
+                    $d = (int) $r['d'];
+                    if ($d >= 0 && $d <= 9) $counts[$d] = (int) $r['c'];
+                }
+            }
+            return $counts;
+        });
+    }
+}
+
+/* ── Definisi 10 kelas DDC (warna + ikon VENOM native) ── */
+if (!function_exists('venom_ddc_classes')) {
+    function venom_ddc_classes() {
+        return [
+            ['code' => 0, 'title' => 'Komputer & Umum',        'desc' => 'Informatika, ensiklopedia, jurnalisme', 'icon' => 'code',     'color' => '#2563eb'],
+            ['code' => 1, 'title' => 'Filsafat & Psikologi',   'desc' => 'Pengembangan diri, etika, logika',    'icon' => 'sparkles', 'color' => '#7c3aed'],
+            ['code' => 2, 'title' => 'Agama',                  'desc' => 'Teologi, kitab suci, sejarah agama',  'icon' => 'moon',     'color' => '#059669'],
+            ['code' => 3, 'title' => 'Ilmu Sosial',            'desc' => 'Ekonomi, hukum, pendidikan',          'icon' => 'users',    'color' => '#b45309'],
+            ['code' => 4, 'title' => 'Bahasa',                 'desc' => 'Linguistik, kamus, sastra bahasa',    'icon' => 'quote',    'color' => '#e11d48'],
+            ['code' => 5, 'title' => 'Sains & Matematika',     'desc' => 'Fisika, biologi, kimia',              'icon' => 'fire',     'color' => '#0d9488'],
+            ['code' => 6, 'title' => 'Teknologi',              'desc' => 'Kesehatan, teknik, kewirausahaan',    'icon' => 'layers',   'color' => '#4f46e5'],
+            ['code' => 7, 'title' => 'Seni & Olahraga',        'desc' => 'Seni rupa, musik, olahraga',          'icon' => 'palette',  'color' => '#db2777'],
+            ['code' => 8, 'title' => 'Sastra',                 'desc' => 'Novel, puisi, drama',                 'icon' => 'book',     'color' => '#ea580c'],
+            ['code' => 9, 'title' => 'Sejarah & Geografi',     'desc' => 'Biografi, peta, sejarah dunia',       'icon' => 'pin',      'color' => '#0891b2'],
+        ];
+    }
+}
+
+/* ── 3 Grup Kategori (GMD, Coll Type, Location) ── */
+if (!function_exists('venom_category_groups')) {
+    function venom_category_groups($limit = 10) {
+        return venom_cached('cat_groups_' . $limit, 600, function () use ($limit) {
+            $out = [];
+            // Grup 1: Type of Material (GMD)
+            $rows = venom_rows("SELECT g.gmd_name, COUNT(*) AS c FROM biblio b
+                                 INNER JOIN mst_gmd g ON g.gmd_id=b.gmd_id
+                                 WHERE b.opac_hide=0
+                                 GROUP BY g.gmd_id ORDER BY c DESC LIMIT " . $limit);
+            $out[] = ['title' => 'Tipe Material', 'param' => 'gmd', 'icon' => 'layers', 'rows' => $rows, 'label' => 'gmd_name'];
+
+            // Grup 2: Collection Type
+            $rows = venom_rows("SELECT t.coll_type_name, COUNT(DISTINCT i.biblio_id) AS c FROM item i
+                                 INNER JOIN mst_coll_type t ON t.coll_type_id=i.coll_type_id
+                                 INNER JOIN biblio b ON b.biblio_id=i.biblio_id AND b.opac_hide=0
+                                 GROUP BY t.coll_type_id ORDER BY c DESC LIMIT " . $limit);
+            $out[] = ['title' => 'Jenis Koleksi', 'param' => 'colltype', 'icon' => 'tag', 'rows' => $rows, 'label' => 'coll_type_name'];
+
+            // Grup 3: Location
+            $rows = venom_rows("SELECT l.location_name, COUNT(DISTINCT i.biblio_id) AS c FROM item i
+                                 INNER JOIN mst_location l ON l.location_id=i.location_id
+                                 INNER JOIN biblio b ON b.biblio_id=i.biblio_id AND b.opac_hide=0
+                                 GROUP BY l.location_id ORDER BY c DESC LIMIT " . $limit);
+            $out[] = ['title' => 'Lokasi', 'param' => 'location', 'icon' => 'pin', 'rows' => $rows, 'label' => 'location_name'];
+
+            return $out;
+        });
+    }
+}
+
+/* ── Popular Collections (berdasarkan jumlah loan, beda dari Featured) ── */
+if (!function_exists('venom_popular_collections')) {
+    function venom_popular_collections($limit = 6) {
+        $limit = max(1, min(24, (int) $limit));
+        return venom_cached('popular_' . $limit, 300, function () use ($limit) {
+            return venom_rows(venom_select_biblio() . "
+                LEFT JOIN (SELECT i.biblio_id, COUNT(*) AS loans FROM loan l
+                            INNER JOIN item i ON i.item_code=l.item_code
+                            GROUP BY i.biblio_id) AS loan_stats ON loan_stats.biblio_id=b.biblio_id
+                WHERE b.opac_hide = 0
+                ORDER BY COALESCE(loan_stats.loans,0) DESC, b.last_update DESC
+                LIMIT " . $limit);
+        });
+    }
+}
+
+/* ── Collection Type Pills (5 tipe terbesar) ── */
+if (!function_exists('venom_collection_type_pills')) {
+    function venom_collection_type_pills($limit = 5) {
+        return venom_cached('ctype_pills_' . $limit, 600, function () use ($limit) {
+            return venom_rows("SELECT t.coll_type_name, COUNT(DISTINCT i.biblio_id) AS c
+                                 FROM mst_coll_type t
+                                 LEFT JOIN item i ON i.coll_type_id=t.coll_type_id
+                                 INNER JOIN biblio b ON b.biblio_id=i.biblio_id AND b.opac_hide=0
+                                 GROUP BY t.coll_type_id
+                                 ORDER BY c DESC, t.coll_type_name ASC LIMIT " . $limit);
+        });
+    }
 }
 
 /* ── Debug probe ──────────────────────────────────────────────────── */

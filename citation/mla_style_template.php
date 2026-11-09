@@ -1,10 +1,9 @@
 <?php
 /**
  * VENOM · MLA Style Citation (9th Edition)
+ * Terintegrasi penuh dengan venom-app.js (data-copy attribute)
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
-if (!defined('VENOM_CITE_ASSETS_LOADED')) { require __DIR__ . '/apa_style_template.php'; }
-/* Jika aset sudah dimuat oleh file lain, blok di atas tidak mengeksekusi ulang. */
 
 $vnx_src   = (isset($detail) && is_array($detail)) ? $detail : [];
 $vnx_e     = function ($s) { return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8'); };
@@ -28,7 +27,6 @@ $vnx_split = function ($name) {
     return [$last, implode(' ', $p)];
 };
 
-/* ── Format penulis MLA ── */
 $vnx_n = [];
 foreach ($vnx_raw as $vnx_nm) {
     list($vnx_l, $vnx_f) = $vnx_split($vnx_nm);
@@ -40,18 +38,25 @@ elseif ($c === 1) $vnx_au = $vnx_n[0][0] . ($vnx_n[0][1] !== '' ? ', ' . $vnx_n[
 elseif ($c === 2) $vnx_au = $vnx_n[0][0] . ', ' . $vnx_n[0][1] . ', and ' . $vnx_n[1][1] . ' ' . $vnx_n[1][0];
 else $vnx_au = $vnx_n[0][0] . ', ' . $vnx_n[0][1] . ', et al.';
 
-$vnx_out = '';
-if ($vnx_au !== '') $vnx_out .= $vnx_e($vnx_au) . '. ';
-$vnx_out .= '<em>' . $vnx_e($vnx_title !== '' ? $vnx_title : 'Tanpa judul') . '</em>.';
-if ($vnx_ed !== '') $vnx_out .= ' ' . $vnx_e($vnx_ed) . ',';
-if ($vnx_pub !== '') $vnx_out .= ' ' . $vnx_e($vnx_pub) . ',';
-$vnx_out .= ' ' . $vnx_e($vnx_year !== '' ? $vnx_year : 'n.d.') . '.';
+$vnx_out_html = '';
+if ($vnx_au !== '') $vnx_out_html .= $vnx_e($vnx_au) . '. ';
+$vnx_out_html .= '<em>' . $vnx_e($vnx_title !== '' ? $vnx_title : 'Tanpa judul') . '</em>.';
+if ($vnx_ed !== '') $vnx_out_html .= ' ' . $vnx_e($vnx_ed) . ',';
+if ($vnx_pub !== '') $vnx_out_html .= ' ' . $vnx_e($vnx_pub) . ',';
+$vnx_out_html .= ' ' . $vnx_e($vnx_year !== '' ? $vnx_year : 'n.d.') . '.';
+
+// OPTIMASI: Buat versi plain text untuk atribut data-copy agar venom-app.js bisa menyalinnya dengan bersih
+$vnx_out_plain = strip_tags($vnx_out_html);
+$vnx_out_plain = html_entity_decode($vnx_out_plain, ENT_QUOTES, 'UTF-8');
 ?>
-<div class="vnx-cite">
-  <div class="vnx-cite-head">
-    <span class="vnx-cite-badge">MLA</span>
-    <span class="vnx-cite-name">MLA Style · 9th Edition</span>
-    <button type="button" class="vnx-cite-copy" title="Salin sitasi MLA" aria-label="Salin sitasi MLA"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+<div class="vnx-cite v-card v-pad" style="margin-top: 16px;">
+  <div class="vnx-cite-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <span class="v-chip v-chip-xs">MLA 9th Edition</span>
+    <!-- OPTIMASI: data-copy berisi teks bersih, kompatibel langsung dengan venom-app.js -->
+    <button type="button" class="v-btn v-btn-ghost v-btn-sm" data-copy="<?= $vnx_e($vnx_out_plain) ?>" title="Salin sitasi MLA" aria-label="Salin sitasi MLA">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Salin
+    </button>
   </div>
-  <p class="vnx-cite-body"><?= $vnx_out ?></p>
+  <p class="vnx-cite-body" style="font-size: 0.95rem; line-height: 1.6; color: var(--v-tx); padding-left: 12px; border-left: 3px solid var(--v-p);"><?= $vnx_out_html ?></p>
 </div>

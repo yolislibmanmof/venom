@@ -30,16 +30,31 @@ return [
     ],
 
     'features' => [
-        'hero' => true, 'stats' => true, 'new_arrivals' => true, 
-        'featured' => true, 'topics' => true, 'news' => true, 
-        'fab' => true, 'palette_switcher' => true,
-        // Fitur Baru Tahap 2
+        // ─── Fitur Inti ───
+        'hero' => true, 
+        'stats' => true, 
+        'new_arrivals' => true, 
+        'featured' => true, 
+        'topics' => true, 
+        'news' => true, 
+        'fab' => true, 
+        'palette_switcher' => true,
+        
+        // ─── Fitur Tahap 2: FX & Interaksi ───
         'cursor_glow' => true,
         'particles' => true,
         'prayer_times' => true,
         'live_ticker' => true,
         'floating_chat' => true,
         'mobile_bottom_nav' => true,
+        
+        // ─── ✅ Fitur Baru Tahap 3: Eksplorasi Koleksi (dari Pustaka Ceria) ───
+        'ddc_browse'      => true,   // Grid 10 kelas DDC (000-900) dengan warna per kelas
+        'category_cards'  => true,   // 3 Card kategori (Tipe Material / Jenis / Lokasi)
+        'ctype_pills'     => true,   // Pills 5 tipe koleksi terbesar
+        
+        // ─── Opsi Tambahan (Opsional) ───
+        'member_cta'      => true,   // CTA "Belum Jadi Anggota?"
     ],
 
     'prayer' => [

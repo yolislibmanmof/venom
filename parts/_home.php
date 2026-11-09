@@ -115,6 +115,92 @@ $vstats  = venom_stats();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 6.5 KOLEKSI TERPOPULER (Popular by Loan - BEDA dari Featured) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if (venom_on('featured')): $vpop = venom_popular_collections(6); if ($vpop): ?>
+<section class="v-wrap v-sec">
+  <?= venom_section_head('star', 'Koleksi Terpopuler', 'Buku yang paling sering dipinjam anggota perpustakaan') ?>
+  <?= venom_book_grid($vpop, 'POPULER') ?>
+</section>
+<?php endif; endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 6.6 KLASIFIKASI DDC (10 kelas 000-900 dengan warna berbeda)    -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if (venom_cfg('features.ddc_browse', true)): $ddc = venom_ddc_classes(); $ddc_counts = venom_ddc_counts(); ?>
+<section class="v-wrap v-sec">
+  <?= venom_section_head('grid', 'Jelajahi DDC', 'Temukan koleksi berdasarkan 10 kelas utama Dewey Decimal Classification') ?>
+  <div class="v-ddc-grid">
+    <?php foreach ($ddc as $d): $count = $ddc_counts[$d['code']]; ?>
+      <a class="v-ddc-item v-reveal" style="--ddc-color: <?= $d['color'] ?>"
+         href="<?= venom_u('index.php?callnumber=' . $d['code'] . '&search=Search') ?>">
+        <div class="v-ddc-head">
+          <span class="v-ddc-ico"><?= venom_icon($d['icon'], 20) ?></span>
+          <span class="v-ddc-code">DDC <?= $d['code'] ?>00</span>
+        </div>
+        <strong class="v-ddc-title"><?= venom_e($d['title']) ?></strong>
+        <small class="v-ddc-desc"><?= venom_e($d['desc']) ?></small>
+        <em class="v-ddc-count"><?= venom_num($count) ?> koleksi</em>
+      </a>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 6.7 KATEGORI KOLEKSI (3 Card: Tipe Material / Jenis / Lokasi)  -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if (venom_cfg('features.category_cards', true)): $cats = venom_category_groups(10); ?>
+<section class="v-wrap v-sec">
+  <?= venom_section_head('layers', 'Jelajahi Kategori', 'Pilih berdasarkan tipe material, jenis koleksi, atau lokasi') ?>
+  <div class="v-cat-grid">
+    <?php foreach ($cats as $g): ?>
+      <div class="v-cat-card v-reveal">
+        <div class="v-cat-head">
+          <span class="v-cat-icon"><?= venom_icon($g['icon'], 22) ?></span>
+          <div>
+            <strong><?= venom_e($g['title']) ?></strong>
+            <small><?= venom_num(count($g['rows'])) ?> kategori</small>
+          </div>
+        </div>
+        <ul class="v-cat-list">
+          <?php foreach ($g['rows'] as $row): $name = $row[$g['label']]; ?>
+            <li>
+              <a href="<?= venom_u('index.php?' . $g['param'] . '=' . urlencode($name) . '&search=Search') ?>">
+                <span><?= venom_e($name) ?></span>
+                <span class="v-cat-count"><?= venom_num($row['c']) ?></span>
+              </a>
+            </li>
+          <?php endforeach; ?>
+          <?php if (empty($g['rows'])): ?><li><span style="color:var(--v-mut);font-style:italic">Belum ada data</span></li><?php endif; ?>
+        </ul>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 6.8 PILLS TIPE KOLEKSI (5 tipe terbesar sebagai tombol cepat) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<?php if (venom_cfg('features.ctype_pills', true)): $pills = venom_collection_type_pills(5); if ($pills): ?>
+<section class="v-wrap v-sec" style="padding-top:0">
+  <div class="v-ctype-pills">
+    <?php foreach ($pills as $p): ?>
+      <a class="v-ctype-pill v-reveal" href="<?= venom_u('index.php?colltype=' . urlencode($p['coll_type_name']) . '&search=Search') ?>">
+        <span class="v-ctype-icon"><?= venom_icon('tag', 16) ?></span>
+        <span class="v-ctype-text">
+          <strong><?= venom_e($p['coll_type_name']) ?></strong>
+          <small><?= venom_num((int) $p['c']) ?> koleksi</small>
+        </span>
+        <?= venom_icon('right', 16) ?>
+      </a>
+    <?php endforeach; ?>
+  </div>
+</section>
+<?php endif; endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <!-- 7. JELAJAH TOPIK (TOPICS)                                      -->
 <!-- ═══════════════════════════════════════════════════════════════ -->
 <?php if (venom_on('topics')): $vtopics = venom_topics(venom_cfg('limits.topics', 14)); ?>
