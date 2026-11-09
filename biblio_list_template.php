@@ -16,40 +16,31 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
     $detail_url = 'index.php?p=show_detail&id=' . $biblio_id;
     $cite_url   = 'index.php?p=cite&id=' . $biblio_id;
 
-    // image thumbnail
-    $images_loc = 'images/docs/' . ($biblio_detail['image'] ?? '');
-    if (empty($biblio_detail['image'])) {
-        $images_loc = 'images/default/image.png';
-    }
-    // Fallback ke fungsi venom_cover agar CSP-safe dan konsisten
     $cover_url = venom_cover($biblio_detail['image'] ?? '', $title);
-
-    // availability
     $availability = getAvailability($dbs, $biblio_id, $sysconf);
     $is_promoted = !empty($biblio_detail['promoted']) || !empty($biblio_detail['labels']);
 
-    // authors
     $_authors = $biblio_detail['author'] ?? 'Penulis tidak diketahui';
     $_authors_string = '';
     if ($_authors) {
         $authors_arr = is_array($_authors) ? $_authors : explode('-', $_authors);
         foreach ($authors_arr as $a) {
             $a = trim($a);
-            $_authors_string .= '<a href="index.php?author=' . urlencode($a) . '&search=Search" style="color:var(--v-p);text-decoration:none;">' . venom_e($a) . '</a> ';
+            if ($a !== '') {
+                $_authors_string .= '<a href="index.php?author=' . urlencode($a) . '&search=Search" style="color:var(--v-p);text-decoration:none;">' . venom_e($a) . '</a> ';
+            }
         }
     }
 
-    // Cek mode tampilan dari SESSION (Logika inti dari referensi)
     $view_mode = $_POST['view'] ?? $_SESSION['LIST_VIEW'] ?? 'grid';
 
     if ($view_mode === 'list'):
-        // --- LIST VIEW HTML ---
         $year = trim($biblio_detail['publish_year'] ?? '');
         $publisher = trim($biblio_detail['publisher'] ?? '');
         
-        $output .= '<article class="v-book" style="flex-direction:row !important; max-width:100%;">';
-        $output .= '<a class="v-book-cover" href="' . $detail_url . '" style="width:130px !important; min-width:130px; aspect-ratio:auto !important; height:190px;">';
-        $output .= '<img loading="lazy" src="' . venom_e($cover_url) . '" alt="cover" style="width:100%;height:100%;object-fit:cover;">';
+        $output .= '<article class="v-book v-book-list">';
+        $output .= '<a class="v-book-cover" href="' . $detail_url . '">';
+        $output .= '<img loading="lazy" src="' . venom_e($cover_url) . '" alt="cover">';
         if ($availability < 1) {
             $output .= '<span class="v-book-badge" style="background:linear-gradient(120deg,#ef4444,#f97316)">Habis</span>';
         } elseif ($is_promoted) {
@@ -57,18 +48,18 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
         }
         $output .= '</a>';
         
-        $output .= '<div class="v-book-body" style="padding:20px 24px; justify-content:center; flex:1;">';
-        $output .= '<h3 class="v-book-title" style="font-size:1.15rem; -webkit-line-clamp:1;"><a href="' . $detail_url . '">' . venom_e(addEllipsis($title, 120)) . '</a></h3>';
-        $output .= '<p class="v-book-author" style="margin-bottom:8px;">' . $_authors_string . ($year !== '' ? ' <span style="color:var(--v-mut);font-size:0.85rem;">(' . venom_e($year) . ')</span>' : '') . '</p>';
+        $output .= '<div class="v-book-body">';
+        $output .= '<h3 class="v-book-title"><a href="' . $detail_url . '">' . venom_e(addEllipsis($title, 120)) . '</a></h3>';
+        $output .= '<p class="v-book-author">' . $_authors_string . ($year !== '' ? '<span style="color:var(--v-mut);font-size:0.85rem;">(' . venom_e($year) . ')</span>' : '') . '</p>';
         
-        $output .= '<div class="v-book-meta" style="margin-top:auto;">';
+        $output .= '<div class="v-book-meta">';
         if ($publisher !== '') $output .= '<span class="v-book-pub">' . venom_e($publisher) . '</span>';
-        $output .= '<span class="v-chip v-chip-xs" style="margin-left:auto; ' . ($availability > 0 ? 'background:color-mix(in srgb,var(--v-ok) 15%,transparent);color:var(--v-ok)' : 'background:color-mix(in srgb,var(--v-err) 15%,transparent);color:var(--v-err)') . '">';
-        $output .= ($availability > 0 ? 'Tersedia: ' . $availability : 'Dipinjam Semua');
-        $output .= '</span></div></div></article>';
+        $avail_class = ($availability > 0) ? 'background:color-mix(in srgb,var(--v-ok) 15%,transparent);color:var(--v-ok)' : 'background:color-mix(in srgb,var(--v-err) 15%,transparent);color:var(--v-err)';
+        $avail_text = ($availability > 0) ? 'Tersedia: ' . $availability : 'Dipinjam Semua';
+        $output .= '<span class="v-chip v-chip-xs" style="margin-left:auto; ' . $avail_class . '">' . $avail_text . '</span>';
+        $output .= '</div></div></article>';
 
     else:
-        // --- GRID VIEW HTML (Default VENOM) ---
         $year = trim($biblio_detail['publish_year'] ?? '—');
         $publisher = trim($biblio_detail['publisher'] ?? '');
 
@@ -98,26 +89,34 @@ function biblio_list_format($dbs, $biblio_detail, $n, $settings = array(), &$ret
     return $output;
 }
 
-// --- HELPER FUNCTIONS (Wajib ada agar tidak error) ---
-function getNotes($dbs, $biblio_id) {
-    $query = $dbs->query('SELECT notes FROM biblio WHERE biblio_id = ' . (int)$biblio_id);
-    $data = $query->fetch_row();
-    return $data ? addEllipsis($data[0], 400) : '';
-}
-
-function addEllipsis($string, $length, $end = '…') {
-    if (strlen($string ?? '') > $length) {
-        $length -= strlen($end);
-        $string  = mb_substr($string, 0, $length, 'UTF-8');
-        $string .= $end;
+// --- HELPER FUNCTIONS (Dibungkus function_exists agar aman dari Fatal Error) ---
+if (!function_exists('getNotes')) {
+    function getNotes($dbs, $biblio_id) {
+        $query = $dbs->query('SELECT notes FROM biblio WHERE biblio_id = ' . (int)$biblio_id);
+        $data = $query ? $query->fetch_row() : null;
+        return $data ? addEllipsis($data[0], 400) : '';
     }
-    return $string;
 }
 
-function getAvailability($dbs, $biblio_id, $sysconf) {
-    $_item_q = $dbs->query('SELECT COUNT(*) FROM item WHERE biblio_id=' . (int)$biblio_id);
-    $_item_c = $_item_q->fetch_row();
-    $_borrowed_q = $dbs->query('SELECT COUNT(*) FROM loan AS l INNER JOIN item AS i ON l.item_code=i.item_code WHERE l.is_lent=1 AND l.is_return=0 AND i.biblio_id=' . (int)$biblio_id);
-    $_borrowed_c = $_borrowed_q->fetch_row();
-    return ($_item_c[0] ?? 0) - ($_borrowed_c[0] ?? 0);
+if (!function_exists('addEllipsis')) {
+    function addEllipsis($string, $length, $end = '…') {
+        if (strlen($string ?? '') > $length) {
+            $length -= strlen($end);
+            $string  = mb_substr($string, 0, $length, 'UTF-8');
+            $string .= $end;
+        }
+        return $string;
+    }
+}
+
+if (!function_exists('getAvailability')) {
+    function getAvailability($dbs, $biblio_id, $sysconf) {
+        $_item_q = $dbs->query('SELECT COUNT(*) FROM item WHERE biblio_id=' . (int)$biblio_id);
+        $_item_c = $_item_q ? $_item_q->fetch_row() : [0];
+        
+        $_borrowed_q = $dbs->query('SELECT COUNT(*) FROM loan AS l INNER JOIN item AS i ON l.item_code=i.item_code WHERE l.is_lent=1 AND l.is_return=0 AND i.biblio_id=' . (int)$biblio_id);
+        $_borrowed_c = $_borrowed_q ? $_borrowed_q->fetch_row() : [0];
+        
+        return ($_item_c[0] ?? 0) - ($_borrowed_c[0] ?? 0);
+    }
 }

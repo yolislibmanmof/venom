@@ -5,17 +5,45 @@
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
 require_once __DIR__ . '/../helpers/core.php';
 
-if (!isset($_SESSION['m_id']) || !isset($_SESSION['m_name'])) {
-    echo '<div class="v-mb-wrap">';
-    echo '<div class="v-mb-gate">';
-    echo '<div class="v-mb-gate-icon">' . venom_icon('user', 32) . '</div>';
-    echo '<h2>Area Anggota</h2>';
-    echo '<p>Silakan masuk untuk mengakses dashboard anggota Anda.</p>';
-    echo '<a href="index.php?p=login" class="v-btn v-btn-primary" style="display:inline-flex">' . venom_icon('right', 18) . ' Masuk ke Akun</a>';
-    echo '</div></div>';
-    return;
+// Cek apakah anggota sudah login
+$is_member_login = isset($_SESSION['m_id']) && isset($_SESSION['m_name']);
+
+if (!$is_member_login) {
+    // ==========================================================
+    // JIKA BELUM LOGIN: Tampilkan Form Login SLiMS dengan aman
+    // ==========================================================
+    global $main_content;
+    
+    // Ambil dari global, atau dari Venom_Core, atau fallback kosong
+    $login_html = isset($main_content) && trim($main_content) !== '' 
+                  ? $main_content 
+                  : Venom_Core::get('main_content', '');
+                  
+    // Fallback jika core SLiMS benar-benar belum merender form login
+    if (trim($login_html) === '') {
+        $login_html = '<div style="text-align:center; padding: 2rem; color: var(--v-muted);"><p>Silakan lakukan login melalui form di bawah ini atau halaman utama.</p></div>';
+    }
+    ?>
+    <div class="v-mb-wrap v-page-transition">
+        <div class="v-mb-head" style="text-align: center; justify-content: center; margin-bottom: 2rem;">
+            <div>
+                <h1>Area Anggota</h1>
+                <p>Silakan masuk untuk mengakses dashboard dan riwayat peminjaman Anda.</p>
+            </div>
+        </div>
+        <div class="v-mb-layout" style="display: flex; justify-content: center;">
+            <div class="v-mb-card" style="max-width: 500px; width: 100%;">
+                <?php echo $login_html; ?>
+            </div>
+        </div>
+    </div>
+    <?php
+    return; // Stop eksekusi di sini, jangan tampilkan dashboard
 }
 
+// ==========================================================
+// JIKA SUDAH LOGIN: Tampilkan Dashboard Premium
+// ==========================================================
 $member_id    = $_SESSION['m_id'];
 $member_name  = $_SESSION['m_name'];
 $member_email = $_SESSION['m_email'] ?? '';
@@ -28,21 +56,14 @@ $loans_overdue = 0;
 $loans_total = 0;
 
 if (Venom_Core::db()) {
+    // Ambil data member
     $member_data = venom_row("SELECT * FROM member WHERE member_id = '" . Venom_Sec::sql($member_id) . "' LIMIT 1");
     if (!empty($member_data)) {
         $member_email = $member_email ?: ($member_data['email'] ?? '');
         $member_phone = $member_phone ?: ($member_data['phone'] ?? '');
     }
 
-    $loans = venom_rows("SELECT l.loan_id, l.loan_date, l.due_date, l.return_date, i.item_code, b.title, b.biblio_id
-                          FROM loan l
-                          LEFT JOIN item i ON i.item_code = l.item_code
-                          LEFT JOIN biblio b ON b.biblio_id = l.member_id
-                          WHERE l.member_id = '" . Venom_Sec::sql($member_id) . "'
-                          ORDER BY l.return_date IS NULL DESC, l.due_date ASC
-                          LIMIT 12");
-
-    // Perbaikan JOIN: item.biblio_id
+    // Ambil data peminjaman (JOIN yang benar: item.biblio_id)
     $loans = venom_rows("SELECT l.loan_id, l.loan_date, l.due_date, l.return_date, l.item_code, b.title, b.biblio_id
                           FROM loan l
                           LEFT JOIN item i ON i.item_code = l.item_code
@@ -51,15 +72,19 @@ if (Venom_Core::db()) {
                           ORDER BY l.return_date IS NULL DESC, l.due_date ASC
                           LIMIT 12");
 
+    // Hitung statistik
     foreach ($loans as $l) {
         $loans_total++;
         if (empty($l['return_date'])) {
             $loans_active++;
-            if (!empty($l['due_date']) && strtotime($l['due_date']) < time()) $loans_overdue++;
+            if (!empty($l['due_date']) && strtotime($l['due_date']) < time()) {
+                $loans_overdue++;
+            }
         }
     }
 }
 
+// Generate inisial nama untuk avatar
 $initials = '';
 $parts = preg_split('/\s+/', trim($member_name));
 foreach (array_slice($parts, 0, 2) as $p) {
@@ -67,19 +92,19 @@ foreach (array_slice($parts, 0, 2) as $p) {
 }
 $initials = strtoupper($initials);
 
-// QR Code generator (simple SVG)
+// QR Code generator (simple SVG pattern based on hash)
 function venom_qr_svg($text, $size = 120) {
     $h = sprintf('%x', crc32($text));
     $bits = str_pad(decbin(hexdec($h)), 32, '0', STR_PAD_LEFT);
     $n = 8;
     $cell = (int) floor($size / $n);
     $svg = '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 ' . ($n*$cell) . ' ' . ($n*$cell) . '" xmlns="http://www.w3.org/2000/svg">';
-    $svg .= '<rect width="100%" height="100%" fill="#fff"/>';
+    $svg .= '<rect width="100%" height="100%" fill="rgba(255,255,255,0.1)"/>';
     for ($y = 0; $y < $n; $y++) {
         for ($x = 0; $x < $n; $x++) {
             $idx = ($y * $n + $x) % 32;
             if ($bits[$idx] === '1') {
-                $svg .= '<rect x="' . ($x*$cell) . '" y="' . ($y*$cell) . '" width="' . $cell . '" height="' . $cell . '" fill="#0f172a"/>';
+                $svg .= '<rect x="' . ($x*$cell) . '" y="' . ($y*$cell) . '" width="' . $cell . '" height="' . $cell . '" fill="#ffffff" rx="2"/>';
             }
         }
     }
@@ -94,7 +119,7 @@ function venom_qr_svg($text, $size = 120) {
             <h1>Selamat Datang, <?= venom_e($member_name) ?></h1>
             <p>Dashboard anggota perpustakaan Anda</p>
         </div>
-        <a href="index.php?p=logout" class="v-btn v-btn-ghost v-btn-sm"><?= venom_icon('right', 16) ?> Keluar</a>
+        <a href="index.php?p=member&logout=1" class="v-btn v-btn-ghost v-btn-sm"><?= venom_icon('right', 16) ?> Keluar</a>
     </div>
 
     <div class="v-mb-layout">
@@ -126,7 +151,7 @@ function venom_qr_svg($text, $size = 120) {
                 <?php if (!empty($member_data['expire_date'])): ?>
                 <div class="v-mb-row">
                     <?= venom_icon('shield', 16) ?>
-                    <div><b>Berlaku sampai</b><span><?= venom_e(substr($member_data['expire_date'], 0, 10)) ?></span></div>
+                    <div><b>Berlaku sampai</b><span class="<?= strtotime($member_data['expire_date']) < time() ? 'text-err' : '' ?>"><?= venom_e(substr($member_data['expire_date'], 0, 10)) ?></span></div>
                 </div>
                 <?php endif; ?>
             </div>
@@ -134,7 +159,8 @@ function venom_qr_svg($text, $size = 120) {
             <div class="v-mb-digicard">
                 <div class="v-mb-digicard-label">Kartu Anggota Digital</div>
                 <div class="v-mb-digicard-title"><?= venom_e(venom_library_name()) ?></div>
-                <div class="v-mb-digicard-qr"><?= venom_qr_svg($member_id . '|' . $member_name, 110) ?></div>
+                <div class="v-mb-digicard-qr"><?= venom_qr_svg($member_id . '|' . $member_name, 100) ?></div>
+                <div class="v-mb-digicard-id"><?= venom_e($member_id) ?></div>
             </div>
         </aside>
 
@@ -172,15 +198,18 @@ function venom_qr_svg($text, $size = 120) {
                     <h3>Riwayat Peminjaman</h3>
                 </div>
                 <?php if (empty($loans)): ?>
-                    <p style="color:var(--v-mut);text-align:center;padding:20px 0">Belum ada riwayat peminjaman.</p>
+                    <div class="v-mb-empty">
+                        <?= venom_icon('inbox', 32) ?>
+                        <p>Belum ada riwayat peminjaman.</p>
+                    </div>
                 <?php else: ?>
-                    <div style="overflow-x:auto">
+                    <div class="v-mb-table-wrap">
                         <table class="v-mb-loans">
                             <thead>
                                 <tr>
-                                    <th>Judul</th>
-                                    <th>Kode</th>
-                                    <th>Pinjam</th>
+                                    <th>Judul Koleksi</th>
+                                    <th>Kode Barang</th>
+                                    <th>Tgl Pinjam</th>
                                     <th>Jatuh Tempo</th>
                                     <th>Status</th>
                                 </tr>
@@ -189,7 +218,6 @@ function venom_qr_svg($text, $size = 120) {
                             <?php foreach ($loans as $l):
                                 $is_returned = !empty($l['return_date']);
                                 $is_overdue  = !$is_returned && !empty($l['due_date']) && strtotime($l['due_date']) < time();
-                                $is_active   = !$is_returned;
                                 $chip_class = $is_returned ? 'v-mb-chip-ok' : ($is_overdue ? 'v-mb-chip-err' : 'v-mb-chip-warn');
                                 $chip_text  = $is_returned ? 'Dikembalikan' : ($is_overdue ? 'Terlambat' : 'Dipinjam');
                             ?>
@@ -197,7 +225,7 @@ function venom_qr_svg($text, $size = 120) {
                                     <td>
                                         <p class="v-mb-loan-title"><?= venom_e($l['title'] ?? '—') ?></p>
                                     </td>
-                                    <td class="v-items-code"><?= venom_e($l['item_code'] ?? '—') ?></td>
+                                    <td class="v-mb-code"><?= venom_e($l['item_code'] ?? '—') ?></td>
                                     <td><?= venom_e($l['loan_date'] ?? '—') ?></td>
                                     <td><?= venom_e($l['due_date'] ?? '—') ?></td>
                                     <td><span class="v-mb-chip <?= $chip_class ?>"><?= $chip_text ?></span></td>
@@ -215,11 +243,23 @@ function venom_qr_svg($text, $size = 120) {
                     <?= venom_icon('sparkles', 20) ?>
                     <h3>Layanan Cepat</h3>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
-                    <a href="index.php?keywords=&search=Search" class="v-detail-action"><?= venom_icon('search', 16) ?> Cari Koleksi</a>
-                    <a href="index.php?p=news" class="v-detail-action"><?= venom_icon('news', 16) ?> Berita Terbaru</a>
-                    <a href="index.php?p=suggest" class="v-detail-action"><?= venom_icon('star', 16) ?> Usulkan Koleksi</a>
-                    <a href="index.php?p=help" class="v-detail-action"><?= venom_icon('shield', 16) ?> Panduan</a>
+                <div class="v-mb-actions">
+                    <a href="index.php?keywords=&search=Search" class="v-mb-action">
+                        <span class="v-mb-action-icon"><?= venom_icon('search', 18) ?></span>
+                        <span>Cari Koleksi</span>
+                    </a>
+                    <a href="index.php?p=news" class="v-mb-action">
+                        <span class="v-mb-action-icon"><?= venom_icon('news', 18) ?></span>
+                        <span>Berita Terbaru</span>
+                    </a>
+                    <a href="index.php?p=suggest" class="v-mb-action">
+                        <span class="v-mb-action-icon"><?= venom_icon('star', 18) ?></span>
+                        <span>Usulkan Koleksi</span>
+                    </a>
+                    <a href="index.php?p=help" class="v-mb-action">
+                        <span class="v-mb-action-icon"><?= venom_icon('shield', 18) ?></span>
+                        <span>Panduan</span>
+                    </a>
                 </div>
             </div>
         </div>
