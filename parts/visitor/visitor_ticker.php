@@ -1,156 +1,183 @@
 <?php
 /**
- * VENOM · Live Visitor Ticker
- * Real-time statistics with AJAX refresh
+ * VENOM · Enhanced Live Visitor Ticker
+ * Running text dengan cover cards untuk trending books
  */
 defined('INDEX_AUTH') OR die('Direct access not allowed!');
+require_once __DIR__ . '/../../helpers/core.php';
+require_once __DIR__ . '/../../helpers/visitor.php';
 
-// Get initial stats
-$stats = venom_stats();
+$stats = venom_visitor_stats();
+$trending = array_slice($stats['trending'] ?? [], 0, 8);
 ?>
 
-<div class="v-live-ticker" id="vLiveTicker" data-refresh="60">
+<?php if (!empty($trending)): ?>
+<div class="v-enhanced-ticker">
     <div class="v-ticker-label">
         <span class="v-ticker-dot"></span>
-        <span>Live Statistics</span>
+        <span>Sedang Trending</span>
     </div>
     
     <div class="v-ticker-track">
-        <div class="v-ticker-content" id="vTickerContent">
-            <!-- First set -->
-            <div class="v-ticker-stat">
-                <?= venom_icon('book', 16) ?>
-                <span><?= venom_num($stats['titles']) ?></span>
-                <span>Judul Koleksi</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('layers', 16) ?>
-                <span><?= venom_num($stats['items']) ?></span>
-                <span>Eksemplar</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('users', 16) ?>
-                <span><?= venom_num($stats['members']) ?></span>
-                <span>Anggota</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('chart', 16) ?>
-                <span><?= venom_num($stats['visits']) ?></span>
-                <span>Kunjungan Hari Ini</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('clock', 16) ?>
-                <span><?= venom_num($stats['loans']) ?></span>
-                <span>Sedang Dipinjam</span>
-            </div>
-            
-            <!-- Duplicate for seamless loop -->
-            <div class="v-ticker-stat">
-                <?= venom_icon('book', 16) ?>
-                <span><?= venom_num($stats['titles']) ?></span>
-                <span>Judul Koleksi</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('layers', 16) ?>
-                <span><?= venom_num($stats['items']) ?></span>
-                <span>Eksemplar</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('users', 16) ?>
-                <span><?= venom_num($stats['members']) ?></span>
-                <span>Anggota</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('chart', 16) ?>
-                <span><?= venom_num($stats['visits']) ?></span>
-                <span>Kunjungan Hari Ini</span>
-            </div>
-            <div class="v-ticker-stat">
-                <?= venom_icon('clock', 16) ?>
-                <span><?= venom_num($stats['loans']) ?></span>
-                <span>Sedang Dipinjam</span>
-            </div>
+        <?php for ($loop = 0; $loop < 2; $loop++): ?>
+        <div class="v-ticker-group">
+            <?php foreach ($trending as $book): ?>
+            <a href="index.php?p=show_detail&id=<?= (int)$book['biblio_id'] ?>" class="v-ticker-card">
+                <img src="<?= venom_e(venom_cover($book['image'], $book['title'])) ?>" 
+                     alt="<?= venom_e($book['title']) ?>" 
+                     class="v-ticker-cover"
+                     onerror="this.style.display='none'">
+                <div class="v-ticker-body">
+                    <span class="v-ticker-badge v-ticker-badge-book">
+                        <?= venom_icon('book', 12) ?> Buku
+                    </span>
+                    <span class="v-ticker-title"><?= venom_e(Venom_Sec::text($book['title'], 48)) ?></span>
+                    <span class="v-ticker-loans">
+                        <?= venom_icon('refresh', 12) ?> <?= (int)$book['loan_count'] ?>x
+                    </span>
+                </div>
+            </a>
+            <?php endforeach; ?>
         </div>
+        <?php endfor; ?>
     </div>
 </div>
+<?php endif; ?>
 
-<script>
-/**
- * Live ticker updater
- * Fetches new stats via AJAX periodically
- */
-(function() {
-    var ticker = document.getElementById('vLiveTicker');
-    if (!ticker) return;
-    
-    var refreshInterval = parseInt(ticker.getAttribute('data-refresh')) || 60;
-    var content = document.getElementById('vTickerContent');
-    
-    function fetchStats() {
-        // Create a simple AJAX request to get fresh stats
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'index.php?p=visitor&ajax=stats', true);
-        xhr.timeout = 5000;
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    var data = JSON.parse(xhr.responseText);
-                    updateTicker(data);
-                } catch (e) {
-                    // Invalid JSON, ignore
-                }
-            }
-        };
-        
-        xhr.onerror = function() {
-            // Silent fail
-        };
-        
-        xhr.send();
+<style>
+.v-enhanced-ticker {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: var(--v-glass);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--v-gline);
+    padding: 12px 0;
+    overflow: hidden;
+}
+
+.v-ticker-label {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--v-tx);
+    background: var(--v-surf);
+    padding: 8px 16px;
+    border-radius: 999px;
+    z-index: 10;
+    box-shadow: var(--v-sh);
+}
+
+.v-ticker-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--v-ok);
+    animation: tickerPulse 2s ease-in-out infinite;
+}
+
+@keyframes tickerPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+.v-ticker-track {
+    display: flex;
+    animation: tickerScroll 60s linear infinite;
+    padding-left: 180px;
+}
+
+@keyframes tickerScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.v-ticker-group {
+    display: flex;
+    gap: 16px;
+    flex-shrink: 0;
+}
+
+.v-ticker-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px 8px 8px;
+    background: var(--v-surf2);
+    border: 1px solid var(--v-line);
+    border-radius: 12px;
+    text-decoration: none;
+    min-width: 280px;
+    transition: all 0.2s;
+}
+
+.v-ticker-card:hover {
+    border-color: var(--v-p);
+    transform: translateY(-2px);
+    box-shadow: var(--v-sh);
+}
+
+.v-ticker-cover {
+    width: 48px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.v-ticker-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.v-ticker-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    width: fit-content;
+}
+
+.v-ticker-badge-book {
+    background: linear-gradient(135deg, var(--v-p), var(--v-a));
+    color: #fff;
+}
+
+.v-ticker-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--v-tx);
+    line-height: 1.3;
+}
+
+.v-ticker-loans {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--v-mut);
+}
+
+@media (max-width: 768px) {
+    .v-ticker-label {
+        display: none;
     }
     
-    function updateTicker(data) {
-        if (!content || !data) return;
-        
-        var stats = [
-            {icon: 'book', value: data.titles, label: 'Judul Koleksi'},
-            {icon: 'layers', value: data.items, label: 'Eksemplar'},
-            {icon: 'users', value: data.members, label: 'Anggota'},
-            {icon: 'chart', value: data.visits, label: 'Kunjungan Hari Ini'},
-            {icon: 'clock', value: data.loans, label: 'Sedang Dipinjam'}
-        ];
-        
-        // Update first set
-        var html = '';
-        stats.forEach(function(stat) {
-            html += '<div class="v-ticker-stat">' +
-                getIcon(stat.icon) +
-                '<span class="v-ticker-value">' + stat.value.toLocaleString('id-ID') + '</span>' +
-                '<span>' + stat.label + '</span>' +
-                '</div>';
-        });
-        
-        // Duplicate for seamless loop
-        var htmlDup = html;
-        
-        content.innerHTML = html + htmlDup;
+    .v-ticker-track {
+        padding-left: 20px;
     }
-    
-    function getIcon(name) {
-        var icons = {
-            'book': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h8v18H6a2 2 0 0 1-2-2z"/><path d="M14 3h6v18h-6"/></svg>',
-            'layers': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>',
-            'users': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2 21c0-3.5 3-5.5 7-5.5s7 2 7 5.5"/><path d="M17 5.5a3.5 3.5 0 0 1 0 7M18 21c0-2.5-.6-4-2-5"/></svg>',
-            'chart': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
-            'clock': '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>'
-        };
-        return icons[name] || '';
-    }
-    
-    // Auto refresh
-    if (refreshInterval > 0) {
-        setInterval(fetchStats, refreshInterval * 1000);
-    }
-})();
-</script>
+}
+</style>
